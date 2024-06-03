@@ -1,9 +1,24 @@
 cmake_minimum_required(VERSION 2.6)
 project(tmms)
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/bin) # 设置安装前缀
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin) # 设置可执行文件存放位置
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib) # 设置静态库存放位置
+set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/bin) # 设置安装前缀
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin) # 设置可执行文件存放位置，放在项目同级的bin下
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib) # 设置静态库存放位置
 
+
+############ 设置编译jsoncpp库
+include(ExternalProject)        # 添加外部项目
+# 添加和构建外部项目
+ExternalProject_Add(jsoncpp     
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/jsoncpp
+    CONFIGURE_COMMAND mkdir -p ../jsoncpp-build && cd ../jsoncpp-build && cmake ../jsoncpp -DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/lib/jsoncpp/
+    BUILD_COMMAND cd ../jsoncpp-build && make
+    BUILD_IN_SOURCE 1
+    INSTALL_COMMAND cd ../jsoncpp-build && make install)
+
+############ 添加jsoncpp库
+include_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/include/)
+link_directories(&{PROJECT_SOURCE_DIR}/lib/jsoncpp/lib64/)
+link_directories(&{PROJECT_SOURCE_DIR}/lib/jsoncpp/lib/)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)  #STREQUAL是字符串比较的运算符  debug 要调试信息 -g -pipi使用管道加快编译速度
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0 -g -pipe -Wall -Werror -Wno-unused-variable -lrt -pthread")
@@ -28,6 +43,7 @@ if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.2.9)
     message(STATUS "GCC Version > 7.3.0, USING -Wno-error=unused-result -Werror=return-type")
     set(CMAKE_CXX_FLAGS "-Wno-error=unused-result -Werror=return-type ${CMAKE_CXX_FLAGS}")
 endif()
+
 
 # 添加include包含目录，在其中查找头文件
 include_directories(src)
