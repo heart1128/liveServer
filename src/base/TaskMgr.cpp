@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 16:48:58
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-01 18:03:29
- * @FilePath: /liveServer/src/base/TaskMgr.cpp
+ * @LastEditTime: 2024-06-03 11:36:35
+ * @FilePath: /tmms/src/base/TaskMgr.cpp
  * @Description:  learn
  */
 #include "TaskMgr.h"
@@ -36,7 +36,7 @@ void TaskMgr::OnWork()
 /// @brief 加入任务
 /// @param task  Task类的指针指针
 /// @return 是否成功插入
-bool TaskMgr::Add(TaskPtr &task)
+bool TaskMgr::Add(Task::ptr &task)
 {
     std::lock_guard<std::mutex> lk(lock_);
 
@@ -52,7 +52,7 @@ bool TaskMgr::Add(TaskPtr &task)
 /// @brief 
 /// @param task 
 /// @return 
-bool TaskMgr::Del(TaskPtr &task)
+bool TaskMgr::Del(Task::ptr &task)
 {
     std::lock_guard<std::mutex> lk(lock_);
     

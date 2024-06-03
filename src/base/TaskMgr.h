@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-02 17:00:58
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-03 11:36:23
+ * @FilePath: /tmms/src/base/TaskMgr.h
+ * @Description:  learn 
+ */
 #pragma once
 #include "Task.h"
 #include "NonCopyable.h"
@@ -17,11 +25,11 @@ namespace tmms
         
         public:
             void OnWork();
-            bool Add(TaskPtr &task);
-            bool Del(TaskPtr &task);
+            bool Add(Task::ptr &task);
+            bool Del(Task::ptr &task);
 
         private:
-            std::unordered_set<TaskPtr> tasks_; // 直接遍历使用hash
+            std::unordered_set<Task::ptr> tasks_; // 直接遍历使用hash
             std::mutex lock_;
         };
         // 方便单例访问

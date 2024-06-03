@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 17:01:15
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-01 20:33:24
- * @FilePath: /liveServer/src/base/TestTask.cpp
+ * @LastEditTime: 2024-06-03 11:36:05
+ * @FilePath: /tmms/src/base/TestTask.cpp
  * @Description:  learn 
  */
 #include "TaskMgr.h"
@@ -16,21 +16,21 @@ using namespace tmms::base;
 
 void TestTask()
 {
-    TaskPtr task1 = std::make_shared<Task>([](const TaskPtr &task){
+    Task::ptr task1 = std::make_shared<Task>([](const Task::ptr &task){
         std::cout << "task1 interval" <<  1000 << "  now:" << TTime::NowMS() << std::endl;
     }, 1000);
 
-    TaskPtr task2 = std::make_shared<Task>([](const TaskPtr &task){
+    Task::ptr task2 = std::make_shared<Task>([](const Task::ptr &task){
         std::cout << "task2 interval" <<  1000 << "  now:" << TTime::NowMS() << std::endl;
         task->Restart();
     }, 1000);
 
-    TaskPtr task3 = std::make_shared<Task>([](const TaskPtr &task){
+    Task::ptr task3 = std::make_shared<Task>([](const Task::ptr &task){
         std::cout << "task3 interval" <<  500 << "  now:" << TTime::NowMS() << std::endl;
         task->Restart();
     }, 500);
 
-    TaskPtr task4 = std::make_shared<Task>([](const TaskPtr &task){
+    Task::ptr task4 = std::make_shared<Task>([](const Task::ptr &task){
         std::cout << "task4 interval" <<  10000 << "  now:" << TTime::NowMS() << std::endl;
     }, 10000);
     

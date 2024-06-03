@@ -2,14 +2,15 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 18:29:45
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-01 20:42:36
- * @FilePath: /liveServer/src/base/LogStream.cpp
+ * @LastEditTime: 2024-06-03 13:45:20
+ * @FilePath: /tmms/src/base/LogStream.cpp
  * @Description:  learn 
  */
 #include "LogStream.h"
 #include "TTime.h"
 #include <sys/syscall.h>
 #include <cstring>
+#include <iostream>
 
 using namespace tmms::base;
 Logger *tmms::base::g_logger;
@@ -57,6 +58,14 @@ LogStream::LogStream(Logger *logger, const char *file, int line, LogLevel logLev
 LogStream::~LogStream()
 {
     stream_ << "\n";
-    // 每次输入日志都会调用写入
-    logger_->Write(stream_.str());
+    if(logger_)
+    {
+        // 每次输入日志都会调用写入
+        logger_->Write(stream_.str());
+    }
+    else
+    {
+        std::cout << stream_.str() << std::endl;
+    }
+
 }

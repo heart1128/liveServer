@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(tmms)
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/bin) # 设置安装前缀
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin) # 设置可执行文件存放位置，放在项目同级的bin下
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/sbin) # 设置可执行文件存放位置，放在项目同级的bin下
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib) # 设置静态库存放位置
 
 
@@ -16,9 +16,9 @@ ExternalProject_Add(jsoncpp
     INSTALL_COMMAND cd ../jsoncpp-build && make install)
 
 ############ 添加jsoncpp库
-include_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/include/)
-link_directories(&{PROJECT_SOURCE_DIR}/lib/jsoncpp/lib64/)
-link_directories(&{PROJECT_SOURCE_DIR}/lib/jsoncpp/lib/)
+include_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/include/) # 添加查找的include路径
+link_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/lib64/)  # 添加查找lib的路径
+link_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/lib/)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)  #STREQUAL是字符串比较的运算符  debug 要调试信息 -g -pipi使用管道加快编译速度
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0 -g -pipe -Wall -Werror -Wno-unused-variable -lrt -pthread")

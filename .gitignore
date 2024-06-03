@@ -32,4 +32,4 @@ build/*
 bin/*
 lib/*
 
-thrid_party/jsoncpp-build/*
+third_party/jsoncpp-build/*

@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-02 17:00:58
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-03 11:34:27
+ * @FilePath: /tmms/src/base/FileLog.h
+ * @Description:  learn 
+ */
 #pragma once
 #include <string>
 #include <memory>
@@ -28,7 +36,7 @@ namespace tmms
             bool Open(const std::string &filePath);     // 打开日志文件
             size_t WriteLog(const std::string &msg);    // 写日志
             void Rotate(const std::string &file);       // 日志不能太大，日志切分，新的日志文件代替公共句柄
-            void setRotate(RotateType type);            // 切分日志的类型，时间或大小
+            void SetRotate(RotateType type);            // 切分日志的类型，时间或大小
 
             RotateType GetRotateType() const;
             int64_t FileSize() const;

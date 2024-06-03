@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 18:25:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-01 20:38:21
- * @FilePath: /liveServer/src/base/LogStream.h
+ * @LastEditTime: 2024-06-03 14:04:16
+ * @FilePath: /tmms/src/base/LogStream.h
  * @Description:  learn 
  */
 #pragma once
@@ -46,22 +46,22 @@ namespace tmms
 
 
 #define LOG_TRACE   \
-    if(tmms::base::g_logger->GetLogLevel() <= KTrace)   \
+    if(g_logger && tmms::base::g_logger->GetLogLevel() <= KTrace)   \
         tmms::base::LogStream(g_logger, __FILE__, __LINE__, tmms::base::KTrace, __func__) 
 
 #define LOG_DEBUG   \
-    if(tmms::base::g_logger->GetLogLevel() <= KDebug)   \
+    if(g_logger && tmms::base::g_logger->GetLogLevel() <= KDebug)   \
         tmms::base::LogStream(g_logger, __FILE__, __LINE__, tmms::base::KDebug, __func__) 
 
 #define LOG_WARN   \
         tmms::base::LogStream(g_logger, __FILE__, __LINE__, tmms::base::KWarn) 
 
 #define LOG_INFO   \
-    if(tmms::base::g_logger->GetLogLevel() <= KInfo)   \
+    if(g_logger && tmms::base::g_logger->GetLogLevel() <= KInfo)   \
         tmms::base::LogStream(g_logger, __FILE__, __LINE__, tmms::base::KTrace) 
 
 #define LOG_ERROR  \
-    if(tmms::base::g_logger->GetLogLevel() <= KError)   \
+    if(g_logger && tmms::base::g_logger->GetLogLevel() <= KError)   \
         tmms::base::LogStream(g_logger, __FILE__, __LINE__, tmms::base::KError, __func__) 
 
 // define不能在文件的末尾，至少加一个空行

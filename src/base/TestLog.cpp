@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 20:31:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-02 15:14:00
- * @FilePath: /liveServer/src/base/TestLog.cpp
+ * @LastEditTime: 2024-06-03 11:37:02
+ * @FilePath: /tmms/src/base/TestLog.cpp
  * @Description:  learn 
  */
 #include "LogStream.h"
@@ -36,12 +36,12 @@ void TestLog()
 int main()
 {
     FileLog::ptr log = sFileMgr->GetFileLog("test.log");
-    log->setRotate(kRotateMinute);
+    log->SetRotate(kRotateMinute);
     tmms::base::g_logger = new Logger(log);
     tmms::base::g_logger->SetLogLevel(KTrace);
 
     // 注册定时任务
-    TaskPtr task = std::make_shared<Task>([](const TaskPtr &task){
+    Task::ptr task = std::make_shared<Task>([](const Task::ptr &task){
         sFileMgr->OnCheck();    // 检测文件切分
         task->Restart(); 
     }, 1000);
