@@ -10,6 +10,7 @@
 #include "TTime.h"
 #include "StringUtils.h"
 #include <sstream>
+#include <iostream>
 
 using namespace tmms::base;
 
@@ -60,6 +61,7 @@ void FileMgr::OnCheck()
     std::lock_guard<std::mutex> lk(lock_);
     for(auto &log : logs_)
     {   
+        std::cout << log.second->GetRotateType() << std::endl;
         // 如果设置了按小时切分
         if(hour_change && log.second->GetRotateType() == kRotateHour)
         {

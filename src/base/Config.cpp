@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 10:36:44
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 13:57:46
+ * @LastEditTime: 2024-06-03 14:14:16
  * @FilePath: /tmms/src/base/Config.cpp
  * @Description:  learn 
  */
@@ -112,7 +112,7 @@ bool Config::ParseLogInfo(const Json::Value &root)
     }
     else
     {
-        LOG_DEBUG << "parse log level error!";
+        LOG_DEBUG << "parse log level rotate!";
         return false;
     }
 

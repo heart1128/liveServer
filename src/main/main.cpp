@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 16:12:24
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 14:10:40
+ * @LastEditTime: 2024-06-03 14:20:39
  * @FilePath: /tmms/src/main/main.cpp
  * @Description:  learn 
  */
@@ -30,8 +30,6 @@ void Test_config_and_rotate()
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
     });
-
-    t.join();
 }
 
 int main(int argc, char* argv[])
@@ -46,7 +44,8 @@ int main(int argc, char* argv[])
     LogInfo::ptr log_info = config->GetLogInfo();
     std::cout << "log level : " << log_info->level 
               << "\nlog path : " << log_info->path
-              << "\nlog name : " << log_info->name << std::endl;
+              << "\nlog name : " << log_info->name
+              << "\nlog rotate : " << log_info->rotate_type << std::endl;
     FileLog::ptr log = sFileMgr->GetFileLog(log_info->path + log_info->name);
     if(!log)
     {
