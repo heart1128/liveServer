@@ -2,12 +2,13 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:47:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-04 15:29:46
+ * @LastEditTime: 2024-06-04 20:06:50
  * @FilePath: /tmms/src/network/net/EventLoop.cpp
  * @Description:  learn 
  */
 #include "EventLoop.h"
 #include "network/base/Network.h"
+#include "base/TTime.h"
 #include <cstring>
 #include <fcntl.h>
 #include <sys/socket.h>
@@ -31,6 +32,7 @@ epoll_events_(1024)
     }
     
     t_local_eventloop = this;
+    
 }
 
 EventLoop::~EventLoop()
@@ -42,6 +44,7 @@ EventLoop::~EventLoop()
 void EventLoop::Loop()
 {
     looping_ = true;
+    int64_t timeout = 1000;
 
     while(looping_)
     {
@@ -49,9 +52,9 @@ void EventLoop::Loop()
         auto ret = ::epoll_wait(epoll_fd_, 
                                 (struct epoll_event*)&epoll_events_[0],
                                 static_cast<int>(epoll_events_.size()),
-                                -1);
+                                timeout);  // 1000ms也就是1s超时，超时不会执行for，只是执行任务队列和触发时间轮
         
-        if(ret >= 0)             // success
+        if(ret >= 0)             // 超时的值是0
         {
             for(int i = 0; i < ret; i++)
             {
@@ -98,11 +101,13 @@ void EventLoop::Loop()
             }
 
             RunFunctions();     // 无论什么触发了epoll。都会把任务队列的任务全部执行
+            int64_t now = tmms::base::TTime::NowMS();
+            wheel_.OnTimer(now);
         }
         else if(ret < 0)        // error
         {
             NETWORK_ERROR << "epoll wait error.error:" << errno;
-        }
+        } 
     }
 }
 
@@ -275,6 +280,79 @@ void EventLoop::RunInLoop(const Func &&f)
     }
 }
 
+void EventLoop::InstertEntry(uint32_t delay, EntryPtr entryPtr)
+{
+    if(IsInLoopThread())
+    {
+        wheel_.InstertEntry(delay, entryPtr);
+    }
+    else        // 不在这个线程里就加入任务队列跑
+    {
+        RunInLoop([this, delay, entryPtr]{    // 同样是插入了时间轮跑
+            wheel_.InstertEntry(delay, entryPtr);
+        });
+    }
+}
+
+void EventLoop::RunAfter(double delay, const Func &cb)
+{
+    if(IsInLoopThread())
+    {
+        wheel_.RunAfter(delay, cb);
+    }
+    else        // 不在这个线程里就加入任务队列跑
+    {
+        RunInLoop([this, delay, cb]{    // 同样是插入了时间轮跑
+            wheel_.RunAfter(delay, cb);
+        });
+    }
+}
+
+/// @brief 设置delay秒之后执行cb任务
+/// @param delay 单位：s
+/// @param cb void()类型的回调函数
+void EventLoop::RunAfter(double delay, const Func &&cb)
+{
+    if(IsInLoopThread())
+    {
+        wheel_.RunAfter(delay, cb);
+    }
+    else        // 不在这个线程里就加入任务队列跑
+    {
+        RunInLoop([this, delay, cb]{    // 同样是插入了时间轮跑
+            wheel_.RunAfter(delay, cb);
+        });
+    }
+}
+
+void EventLoop::RunEvery(double interval, const Func &cb)
+{
+    if(IsInLoopThread())
+    {
+       wheel_.RunEvery(interval, cb);
+    }
+    else        // 不在这个线程里就加入任务队列跑
+    {
+        RunInLoop([this, interval, cb]{    // 同样是插入了时间轮跑
+           wheel_.RunEvery(interval, cb);
+        });
+    }  
+}
+
+void EventLoop::RunEvery(double interval, const Func &&cb)
+{
+    if(IsInLoopThread())
+    {
+       wheel_.RunEvery(interval, cb);
+    }
+    else        // 不在这个线程里就加入任务队列跑
+    {
+        RunInLoop([this, interval, cb](){    // 同样是插入了时间轮跑
+           wheel_.RunEvery(interval, cb);
+        });
+    }
+}
+
 /// @brief 执行任务队列里的任务，因为这个队列是多线程共享，所以要加锁。
 void EventLoop::RunFunctions()
 {
@@ -282,8 +360,17 @@ void EventLoop::RunFunctions()
     while(!functions_.empty())
     {
         auto &f = functions_.front();
+        f();
+        functions_.pop();
+
+        /**
+         * bug经历：
+         * 
         functions_.pop();
         f();
+        这样写出问题了，因为f是引用的，先删除在引用函数就出错了
+         * 
+        */
     }
 }
 

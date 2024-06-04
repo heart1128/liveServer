@@ -8,6 +8,7 @@
 #include <mutex>
 #include "Event.h"
 #include "PipeEvent.h"
+#include "TimingWheel.h"
 namespace tmms
 {
     namespace network
@@ -33,6 +34,13 @@ namespace tmms
             bool IsInLoopThread() const;
             void RunInLoop(const Func& f);
             void RunInLoop(const Func &&f);
+
+            // 时间轮
+            void InstertEntry(uint32_t delay, EntryPtr entryPtr);   // 插入entry，设置超时时间
+            void RunAfter(double delay, const Func &cb);    // 设置延迟多少时间执行
+            void RunAfter(double delay, const Func &&cb);
+            void RunEvery(double interval, const Func &cb);// 每隔一段时间就执行一遍
+            void RunEvery(double interval, const Func &&cb);
         
         private:
             void RunFunctions();
@@ -46,7 +54,7 @@ namespace tmms
             std::queue<Func> functions_;
             std::mutex lock_;
             PipeEvent::ptr pipe_event_;
-
+            TimingWheel wheel_;
         };
     
         

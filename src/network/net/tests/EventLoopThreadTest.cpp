@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 17:16:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-04 15:24:42
+ * @LastEditTime: 2024-06-04 20:10:25
  * @FilePath: /tmms/src/network/net/tests/EventLoopThreadTest.cpp
  * @Description:  learn 
  */
@@ -10,6 +10,7 @@
 #include "network/net/EventLoopThread.h"
 #include "network/net/EventLoopThreadPool.h"
 #include "network/net/PipeEvent.h"
+#include "network/net/EventLoop.h"
 #include "base/TTime.h"
 #include <iostream>
 #include <chrono>
@@ -75,9 +76,36 @@ void TestEventLoopThreadPool()
     std::cout << "loop : " << loop << std::endl; 
 }
 
+void TestTimingWheelInThreadLoop()
+{
+    EventLoopThreadPool pool(2, 0, 2);      // 2个线程，0cpu开始，2个cpu跑
+    pool.Start();
+    EventLoop* loop = pool.GetNextLoop();
+    std::cout << "loop : " << loop << std::endl; 
+
+    // 设置任务
+    loop->RunAfter(1, [](){
+        std::cout << "run after 1s now : " << tmms::base::TTime::Now() << std::endl;
+    });
+
+    loop->RunEvery(2, [](){
+        std::cout << "run every 2s now : " << tmms::base::TTime::Now() << std::endl;
+    });
+
+    loop->RunEvery(3, [](){
+        std::cout << "run every 3s now : " << tmms::base::TTime::Now() << std::endl;
+    });
+
+    while(1)  // 退出函数线程池就析构了
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+ 
 int main()
 {
-    TestEventLoopThreadPool();
+    // TestEventLoopThreadPool();
+    TestTimingWheelInThreadLoop();
     while(1)
     {
         std::this_thread::sleep_for(std::chrono::seconds(1));
