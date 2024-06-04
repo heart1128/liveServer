@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 17:16:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 21:33:39
+ * @LastEditTime: 2024-06-04 15:24:42
  * @FilePath: /tmms/src/network/net/tests/EventLoopThreadTest.cpp
  * @Description:  learn 
  */
@@ -57,11 +57,16 @@ void TestEventLoopThreadPool()
 
     pool.Start();
 
+    std::cout << "thread id : "<< std::this_thread::get_id() << std::endl;
+
     std::vector<EventLoop*> list = pool.GetLoops();
 
     for(auto &e : list)
     {
-        std::cout << "loop : " << e << std::endl; 
+        // 打印不同的线程loop
+        e->RunInLoop([&e](){
+            std::cout << "loop : " << e << "   this id = " << std::this_thread::get_id() << std::endl; 
+        });
     }
 
     EventLoop* loop = pool.GetNextLoop();
@@ -73,5 +78,9 @@ void TestEventLoopThreadPool()
 int main()
 {
     TestEventLoopThreadPool();
+    while(1)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     return 0;
 }

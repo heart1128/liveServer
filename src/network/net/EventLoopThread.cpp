@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 16:41:15
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 21:22:42
+ * @LastEditTime: 2024-06-04 14:24:28
  * @FilePath: /tmms/src/network/net/EventLoopThread.cpp
  * @Description:  learn 
  */
@@ -61,7 +61,7 @@ void EventLoopThread::startEventLoop()
     // wait可以传入一个lambda，返回bool，如果为true才会结束wait状态
     condition_.wait(lk, [this](){ return running_;});
     loop_ = &loop;
-    promise_loop_.set_value(1); // 解放Run的promise阻塞
+    promise_loop_.set_value(1); // 解放Run的promise阻塞，目的是为了loop_ = &loop
 
     loop.Loop();  // 一直循环，等待指令退出 
 

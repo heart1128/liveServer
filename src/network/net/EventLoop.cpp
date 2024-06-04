@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:47:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 20:32:18
+ * @LastEditTime: 2024-06-04 15:29:46
  * @FilePath: /tmms/src/network/net/EventLoop.cpp
  * @Description:  learn 
  */
@@ -42,7 +42,6 @@ EventLoop::~EventLoop()
 void EventLoop::Loop()
 {
     looping_ = true;
-    int64_t timeout = 1000;
 
     while(looping_)
     {
@@ -50,7 +49,7 @@ void EventLoop::Loop()
         auto ret = ::epoll_wait(epoll_fd_, 
                                 (struct epoll_event*)&epoll_events_[0],
                                 static_cast<int>(epoll_events_.size()),
-                                timeout);
+                                -1);
         
         if(ret >= 0)             // success
         {
@@ -97,10 +96,8 @@ void EventLoop::Loop()
             {
                 epoll_events_.resize(epoll_events_.size() * 2);
             }
-        }
-        else if(ret == 0)       // timeout
-        {
 
+            RunFunctions();     // 无论什么触发了epoll。都会把任务队列的任务全部执行
         }
         else if(ret < 0)        // error
         {
@@ -224,4 +221,81 @@ bool EventLoop::EnableEventReading(const Event::ptr &event, bool enable)
     epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, event->fd_, &ev);
 
     return true;
+}
+
+/// @brief 判断当前的任务所在线程和eventloop所在是不是同一个线程
+void EventLoop::AssertInLoopThread()
+{
+    if(!IsInLoopThread())
+    {
+        NETWORK_ERROR << "It is forbidden to run loop on other thread!!!";
+        exit(-1);
+    }
+}
+
+bool EventLoop::IsInLoopThread() const
+{
+    // 判断当前的线程变量eventloop是不是自己，不是就不在一个线程
+    return t_local_eventloop == this;
+}
+
+/// @brief 传入任务，如果调用任务的线程和loop是在同一个线程内的，就直接执行，如果不是就加入任务队列
+            /// 目的就是：为了保证一个任务是在同一个线程中执行的，而不会因为不在同一个线程中执行，执行到一半
+            /// 就被其他线程抢占执行，错乱
+            /// 如果是在同一个线程，那么执行就可以了，可以保证执行都是在一个线程内
+            /// 如果不是在同一个线程，加入任务队列，loop执行，因为loop是在一个线程执行，所以执行的任务也是在一个线程内执行
+/// @param f  执行任务的函数
+void EventLoop::RunInLoop(const Func &f)
+{
+    if(IsInLoopThread())
+    {
+        f();
+    }
+    else
+    {
+        std::lock_guard<std::mutex> lk(lock_);
+        functions_.push(f);
+
+        WakeUp();
+    }
+}
+
+void EventLoop::RunInLoop(const Func &&f)
+{
+    if(IsInLoopThread())
+    {
+        f();
+    }
+    else
+    {
+        std::lock_guard<std::mutex> lk(lock_);
+        functions_.push(std::move(f));
+
+        WakeUp();
+    }
+}
+
+/// @brief 执行任务队列里的任务，因为这个队列是多线程共享，所以要加锁。
+void EventLoop::RunFunctions()
+{
+    std::lock_guard<std::mutex> lk(lock_);
+    while(!functions_.empty())
+    {
+        auto &f = functions_.front();
+        functions_.pop();
+        f();
+    }
+}
+
+/// @brief  通过发送管道无用数据，唤醒epoll执行任务队列中人物
+void EventLoop::WakeUp()
+{
+    if(!pipe_event_)
+    {
+        pipe_event_ = std::make_shared<PipeEvent>(this);
+        AddEvent(pipe_event_);      // 添加了管道事件，到时候通过管道写一个数据就行。
+    }
+
+    int64_t tmp = 1;        // 读写的数据类型要一样，不然会有数据留在管道，会读阻塞
+    pipe_event_->Write((const char*)&tmp, sizeof(tmp));
 }
