@@ -19,15 +19,15 @@ namespace tmms
 {
     namespace base
     {
-        class InetAdress
+        class InetAddress
         {
         public:
-            using ptr = std::shared_ptr<InetAdress>;
+            using ptr = std::shared_ptr<InetAddress>;
 
-            InetAdress(const std::string &ip, uint16_t port, bool bv6=false);
-            InetAdress(const std::string &host, bool bv6=false);
-            InetAdress() = default;
-            ~InetAdress() = default;
+            InetAddress(const std::string &ip, uint16_t port, bool bv6=false);
+            InetAddress(const std::string &host, bool bv6=false);
+            InetAddress() = default;
+            ~InetAddress() = default;
         
         public:
             void SetHost(const std::string &host);

@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-03 15:08:10
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-05 16:52:20
+ * @FilePath: /tmms/src/network/net/Event.h
+ * @Description:  learn 
+ */
 #pragma once
 
 #include <string>
@@ -21,7 +29,7 @@ namespace tmms
             Event();
             Event(EventLoop *loop);
             Event(EventLoop *loop, int fd);
-            ~Event();
+            virtual ~Event();
         
         public:
             virtual void OnRead();

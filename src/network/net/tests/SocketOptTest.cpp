@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 15:03:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 15:52:50
+ * @LastEditTime: 2024-06-05 16:11:14
  * @FilePath: /tmms/src/network/net/tests/SocketOptTest.cpp
  * @Description:  learn 
  */
@@ -25,7 +25,7 @@ void TestClient()
     }
 
     // 服务器地址
-    InetAdress server("0.0.0.0:34444");
+    InetAddress server("0.0.0.0:34444");
     SocketOpt opt(sock);
     opt.SetNonBlocking(false);
     auto ret = opt.Connect(server);
@@ -48,13 +48,13 @@ void TestServer()
     }
 
     // 服务器地址
-    InetAdress server("0.0.0.0:34444");
+    InetAddress server("0.0.0.0:34444");
     SocketOpt opt(sock);
     opt.SetNonBlocking(false);
 
     opt.BindAddress(server);
     opt.Listen();
-    InetAdress addr;
+    InetAddress addr;
     auto ns = opt.Accept(&addr);
 
     std::cout << "accept ret : " << ns << "   errno :" << errno << std::endl

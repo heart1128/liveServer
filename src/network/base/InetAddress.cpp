@@ -5,60 +5,60 @@
 
 using namespace tmms::base;
 
-InetAdress::InetAdress(const std::string &ip, uint16_t port, bool bv6)
+InetAddress::InetAddress(const std::string &ip, uint16_t port, bool bv6)
 :addr_(ip), port_(std::to_string(port)), is_ipv6_(bv6)
 {
 }
 
-InetAdress::InetAdress(const std::string &host, bool bv6)
+InetAddress::InetAddress(const std::string &host, bool bv6)
 {
     GetIpAndPort(host, addr_, port_);
     is_ipv6_ = bv6;
 }
 
-void InetAdress::SetHost(const std::string &host)
+void InetAddress::SetHost(const std::string &host)
 {
     GetIpAndPort(host, addr_, port_);
 }
 
-void InetAdress::SetAddr(const std::string &addr)
+void InetAddress::SetAddr(const std::string &addr)
 {
     addr_ = addr;
 }
 
-void InetAdress::SetPort(uint16_t port)
+void InetAddress::SetPort(uint16_t port)
 {
     port_ = std::to_string(port);
 }
 
-void InetAdress::SetIsIPv6(bool is_v6)
+void InetAddress::SetIsIPv6(bool is_v6)
 {
     is_ipv6_ = is_v6;
 }
 
-const std::string &InetAdress::IP() const
+const std::string &InetAddress::IP() const
 {
     return addr_;
 }
 
-uint32_t InetAdress::IPv4() const
+uint32_t InetAddress::IPv4() const
 {
     return IPv4(addr_.c_str());
 }
 
-std::string InetAdress::ToIpPort() const
+std::string InetAddress::ToIpPort() const
 {
     std::stringstream ss;
     ss << addr_ << ":" << port_;
     return ss.str();
 }
 
-uint16_t InetAdress::Port() const
+uint16_t InetAddress::Port() const
 {
     return std::atoi(port_.c_str());
 }
 
-void InetAdress::GetSockAddr(sockaddr *saddr) const
+void InetAddress::GetSockAddr(sockaddr *saddr) const
 {
     if(is_ipv6_)
     {
@@ -84,7 +84,7 @@ void InetAdress::GetSockAddr(sockaddr *saddr) const
     }
 }
 
-void InetAdress::GetIpAndPort(const std::string &host, std::string &ip, std::string &port)
+void InetAddress::GetIpAndPort(const std::string &host, std::string &ip, std::string &port)
 {
     auto pos = host.find_first_of(":", 0); // host可能是带端口的
     if(pos != std::string::npos)
@@ -98,14 +98,14 @@ void InetAdress::GetIpAndPort(const std::string &host, std::string &ip, std::str
     }
 }  
 
-bool InetAdress::IsIpV6() const
+bool InetAddress::IsIpV6() const
 {
     return is_ipv6_;
 }
 
 /// @brief 判断是不是广域网地址，也就是判断是不是在a,b,c类私有地址里面
 /// @return 不在私有地址里面就是广域网地址
-bool InetAdress::IsWanIp() const
+bool InetAddress::IsWanIp() const
 {
     uint32_t a_start = IPv4("10.0.0.0");
     uint32_t a_end = IPv4("10.255.255.255");
@@ -122,7 +122,7 @@ bool InetAdress::IsWanIp() const
     return !is_a && !is_b && !is_c && ip != INADDR_LOOPBACK; // 127.0.0.1也不在私有地址，特殊判断
 }
 
-bool InetAdress::IsLanIp() const
+bool InetAddress::IsLanIp() const
 {
     uint32_t a_start = IPv4("10.0.0.0");
     uint32_t a_end = IPv4("10.255.255.255");
@@ -139,12 +139,12 @@ bool InetAdress::IsLanIp() const
     return is_a || is_b || is_c;
 }
 
-bool InetAdress::IsLoopbackIp() const
+bool InetAddress::IsLoopbackIp() const
 {
     return addr_ == "127.0.0.1";
 }
 
-uint32_t InetAdress::IPv4(const char *ip) const
+uint32_t InetAddress::IPv4(const char *ip) const
 {
     struct sockaddr_in addr_in; // ipv4地址结构
     memset(&addr_in, 0x00, sizeof(addr_in));

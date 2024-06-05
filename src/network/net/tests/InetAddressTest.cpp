@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-04 21:36:56
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 15:03:00
+ * @LastEditTime: 2024-06-05 16:11:19
  * @FilePath: /tmms/src/network/net/tests/InetAddressTest.cpp
  * @Description:  learn 
  */
@@ -17,7 +17,7 @@ int main()
     std::string host;
     while(std::cin >> host)
     {
-        InetAdress addr(host);
+        InetAddress addr(host);
         std::cout << "host:" << host << std::endl
                     << "ip:" << addr.IP() << std::endl
                     << "port:" << addr.Port() << std::endl

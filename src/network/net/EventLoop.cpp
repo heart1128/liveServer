@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:47:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-04 20:06:50
+ * @LastEditTime: 2024-06-05 16:30:08
  * @FilePath: /tmms/src/network/net/EventLoop.cpp
  * @Description:  learn 
  */
@@ -265,6 +265,8 @@ void EventLoop::RunInLoop(const Func &f)
     }
 }
 
+/// @brief 保证回调函数是和loop在一个线程内，是就立刻执行，不是加到任务队列在Loop中执行
+/// @param f 
 void EventLoop::RunInLoop(const Func &&f)
 {
     if(IsInLoopThread())
@@ -273,6 +275,7 @@ void EventLoop::RunInLoop(const Func &&f)
     }
     else
     {
+        // 加入到任务队列，然后执行回调，保证回调在同一个线程不间断执行
         std::lock_guard<std::mutex> lk(lock_);
         functions_.push(std::move(f));
 

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 14:18:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 16:01:40
+ * @LastEditTime: 2024-06-05 16:11:59
  * @FilePath: /tmms/src/network/base/SocketOpt.cpp
  * @Description:  learn 
  */
@@ -44,7 +44,7 @@ int SocketOpt::CreateNonblockingUdpSocket(int family)
     return sock;
 }
 
-int SocketOpt::BindAddress(const InetAdress &localaddr)
+int SocketOpt::BindAddress(const InetAddress &localaddr)
 {
     if(localaddr.IsIpV6())      // ipv6
     {
@@ -69,7 +69,7 @@ int SocketOpt::Listen()
 /// @brief socket_accept
 /// @param peeraddr  传入接收的地址，接收一个accept之后的客户端地址
 /// @return 返回客户端的文件描述符，-1就是失败了
-int SocketOpt::Accept(InetAdress *peeraddr)
+int SocketOpt::Accept(InetAddress *peeraddr)
 {
     struct sockaddr_in6 addr;   // 可能接受的是ipv4或者ipv6的，用大的容量装再判断
     socklen_t size = sizeof(addr);
@@ -101,7 +101,7 @@ int SocketOpt::Accept(InetAdress *peeraddr)
     return sock;
 }
 
-int SocketOpt::Connect(const InetAdress &addr)
+int SocketOpt::Connect(const InetAddress &addr)
 {
     struct sockaddr_in6 addr_in;
     addr.GetSockAddr((struct sockaddr*)&addr_in);
@@ -112,14 +112,14 @@ int SocketOpt::Connect(const InetAdress &addr)
 /// @brief 获取本地地址
 /// @param saddr 
 /// @return 一个InetAddress的智能指针
-InetAdress::ptr SocketOpt::GetLocalAddr()
+InetAddress::ptr SocketOpt::GetLocalAddr()
 {
     struct sockaddr_in6 addr_in;
     socklen_t len = sizeof(struct sockaddr_in6);
     // 这个函数获取本地的地址和地址长度
     ::getsockname(sock_,(struct sockaddr*)&addr_in, &len);
     
-    InetAdress::ptr localaddr = std::make_shared<InetAdress>();
+    InetAddress::ptr localaddr = std::make_shared<InetAddress>();
     // 如果协议族是ipv4的，就进行结构体装换
     if(addr_in.sin6_family == AF_INET)
     {
@@ -149,14 +149,14 @@ InetAdress::ptr SocketOpt::GetLocalAddr()
 /// @brief 获取远端地址
 /// @param saddr 
 /// @return 一个InetAddress的智能指针
-InetAdress::ptr SocketOpt::GetPeerAddr()
+InetAddress::ptr SocketOpt::GetPeerAddr()
 {
     struct sockaddr_in6 addr_in;
     socklen_t len = sizeof(struct sockaddr_in6);
     // 这个函数获取远端的地址和地址长度
     ::getpeername(sock_,(struct sockaddr*)&addr_in, &len);
     
-    InetAdress::ptr localaddr = std::make_shared<InetAdress>();
+    InetAddress::ptr localaddr = std::make_shared<InetAddress>();
     // 如果协议族是ipv4的，就进行结构体装换
     if(addr_in.sin6_family == AF_INET)
     {
