@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-04 21:36:56
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-04 21:40:04
+ * @LastEditTime: 2024-06-05 15:03:00
  * @FilePath: /tmms/src/network/net/tests/InetAddressTest.cpp
  * @Description:  learn 
  */
@@ -10,7 +10,7 @@
 #include <string>
 #include <iostream>
 
-using namespace tmms::network;
+using namespace tmms::base;
 
 int main()
 {

@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-04 20:42:25
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-04 21:08:55
- * @FilePath: /tmms/src/network/net/InetAddress.h
+ * @LastEditTime: 2024-06-05 15:02:33
+ * @FilePath: /tmms/src/network/base/InetAddress.h
  * @Description:  learn 
  */
 #pragma once
@@ -13,14 +13,17 @@
 #include <netinet/in.h>
 #include <bits/socket.h> // socket数据类型
 #include <string>
+#include <memory>
 
 namespace tmms
 {
-    namespace network
+    namespace base
     {
         class InetAdress
         {
         public:
+            using ptr = std::shared_ptr<InetAdress>;
+
             InetAdress(const std::string &ip, uint16_t port, bool bv6=false);
             InetAdress(const std::string &host, bool bv6=false);
             InetAdress() = default;

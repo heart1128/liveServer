@@ -3,7 +3,7 @@
 #include <sstream>
 #include "network/base/Network.h"
 
-using namespace tmms::network;
+using namespace tmms::base;
 
 InetAdress::InetAdress(const std::string &ip, uint16_t port, bool bv6)
 :addr_(ip), port_(std::to_string(port)), is_ipv6_(bv6)
