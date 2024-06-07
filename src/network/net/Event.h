@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 15:08:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 16:52:20
+ * @LastEditTime: 2024-06-07 16:23:40
  * @FilePath: /tmms/src/network/net/Event.h
  * @Description:  learn 
  */
@@ -41,6 +41,7 @@ namespace tmms
             bool EnableWriting(bool enable);
             bool EnableReading(bool enable);
             int Fd() const;
+            void Close();
         
         protected:
             int fd_{-1};

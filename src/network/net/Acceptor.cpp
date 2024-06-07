@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:14:39
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 16:58:05
+ * @LastEditTime: 2024-06-07 17:18:58
  * @FilePath: /tmms/src/network/net/Acceptor.cpp
  * @Description:  learn 
  */
@@ -19,9 +19,14 @@ Acceptor::Acceptor(EventLoop *loop, const InetAddress &addr)
 Acceptor::~Acceptor()
 {
     Stop();
+    if(socket_opt_)
+    {
+        delete socket_opt_;
+        socket_opt_ = nullptr;
+    }      
 }
 
-void Acceptor::SetAcceptCallback(const AcceptCallback &&cb)
+void Acceptor::SetAcceptCallback(AcceptCallback &&cb)
 {
     accept_cb_ = std::move(cb);
 }
@@ -46,6 +51,10 @@ void Acceptor::Stop()
 /// @brief 重载虚函数，epoll调用的时候执行
 void Acceptor::OnRead()
 {
+    if(!socket_opt_)
+    {
+        return;
+    }
     while(true)
     {
         InetAddress addr;
@@ -93,12 +102,10 @@ void Acceptor::Open()
     if(addr_.IsIpV6())
     {
         fd_ = SocketOpt::CreateNonblockingTcpSocket(AF_INET6);
-        socket_opt_ = std::make_shared<SocketOpt>(fd_, true);
     }
     else
     {
         fd_ = SocketOpt::CreateNonblockingTcpSocket(AF_INET);
-        socket_opt_ = std::make_shared<SocketOpt>(fd_, false);
     }
 
     if(fd_ < 0)
@@ -106,10 +113,16 @@ void Acceptor::Open()
         NETWORK_ERROR << "socket failed.errno : " << errno;
         exit(-1);
     }
+    if(socket_opt_)
+    {
+        delete socket_opt_;
+        socket_opt_ = nullptr;
+    }
 
     // 因为模版智能指针只认同类型的，不然无法匹配函数
     // epoll监听accept
     loop_->AddEvent(std::dynamic_pointer_cast<Acceptor>(shared_from_this()));
+    socket_opt_ = new SocketOpt(fd_);
     socket_opt_->SetReusePort(true);
     socket_opt_->SetReuseAddr(true);
     socket_opt_->BindAddress(addr_);

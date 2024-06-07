@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 14:18:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 16:11:59
+ * @LastEditTime: 2024-06-07 17:14:44
  * @FilePath: /tmms/src/network/base/SocketOpt.cpp
  * @Description:  learn 
  */
@@ -72,7 +72,7 @@ int SocketOpt::Listen()
 int SocketOpt::Accept(InetAddress *peeraddr)
 {
     struct sockaddr_in6 addr;   // 可能接受的是ipv4或者ipv6的，用大的容量装再判断
-    socklen_t size = sizeof(addr);
+    socklen_t size = sizeof(struct sockaddr_in6);
     int sock = ::accept4(sock_, (struct sockaddr*)&addr, &size, SOCK_CLOEXEC | SOCK_NONBLOCK); // 子进程关闭父进程
 
     if(sock > 0)

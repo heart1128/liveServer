@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:47:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 16:30:08
+ * @LastEditTime: 2024-06-07 17:21:36
  * @FilePath: /tmms/src/network/net/EventLoop.cpp
  * @Description:  learn 
  */
@@ -283,7 +283,7 @@ void EventLoop::RunInLoop(const Func &&f)
     }
 }
 
-void EventLoop::InstertEntry(uint32_t delay, EntryPtr entryPtr)
+void EventLoop::InsertEntry(uint32_t delay, EntryPtr entryPtr)
 {
     if(IsInLoopThread())
     {

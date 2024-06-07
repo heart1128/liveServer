@@ -9,3 +9,6 @@ target_link_libraries(SocketOptTest base network)
 
 add_executable(AcceptorTest AcceptorTest.cpp)
 target_link_libraries(AcceptorTest base network)
+
+add_executable(TcpConnectionTest TcpConnectionTest.cpp)
+target_link_libraries(TcpConnectionTest base network jsoncpp.a)

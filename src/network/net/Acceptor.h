@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:06:40
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-05 16:21:07
+ * @LastEditTime: 2024-06-07 17:18:10
  * @FilePath: /tmms/src/network/net/Acceptor.h
  * @Description:  learn 
  */
@@ -26,7 +26,7 @@ namespace tmms
             Acceptor(EventLoop *loop, const InetAddress &addr);
             ~Acceptor();
 
-            void SetAcceptCallback(const AcceptCallback &&cb);
+            void SetAcceptCallback(AcceptCallback &&cb);
             void SetAcceptCallback(const AcceptCallback &cb);
             void Start();
             void Stop();
@@ -38,7 +38,7 @@ namespace tmms
             void Open();
             InetAddress addr_;
             AcceptCallback accept_cb_;
-            SocketOpt::ptr socket_opt_;
+            SocketOpt *socket_opt_;
         };
     }
 } 

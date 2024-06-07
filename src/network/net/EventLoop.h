@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-03 14:45:22
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-07 16:09:50
+ * @FilePath: /tmms/src/network/net/EventLoop.h
+ * @Description:  learn 
+ */
 #pragma once
 
 #include <vector>
@@ -36,7 +44,7 @@ namespace tmms
             void RunInLoop(const Func &&f);
 
             // 时间轮
-            void InstertEntry(uint32_t delay, EntryPtr entryPtr);   // 插入entry，设置超时时间
+            void InsertEntry(uint32_t delay, EntryPtr entryPtr);   // 插入entry，设置超时时间
             void RunAfter(double delay, const Func &cb);    // 设置延迟多少时间执行
             void RunAfter(double delay, const Func &&cb);
             void RunEvery(double interval, const Func &cb);// 每隔一段时间就执行一遍

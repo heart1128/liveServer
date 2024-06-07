@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 15:08:17
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 19:15:26
+ * @LastEditTime: 2024-06-07 16:23:45
  * @FilePath: /tmms/src/network/net/Event.cpp
  * @Description:  learn 
  */
@@ -29,11 +29,7 @@ Event::Event(EventLoop *loop, int fd)
 
 Event::~Event()
 {
-    if(fd_ > 0)
-    {
-        close(fd_);
-        fd_ = -1;
-    }
+    Close();
 }
  
 void Event::OnRead()
@@ -68,4 +64,13 @@ bool Event::EnableReading(bool enable)
 int Event::Fd() const
 {
     return fd_;
+}
+
+void Event::Close()
+{
+    if(fd_ > 0)
+    {
+        ::close(fd_);
+        fd_ = -1;
+    }
 }
