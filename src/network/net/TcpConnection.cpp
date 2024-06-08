@@ -31,7 +31,7 @@ void TcpConnection::OnClose()
     loop_->AssertInLoopThread();        // 关闭是要判断是在同一个事件循环的
     if(!closed_)
     {
-        closed_ = true;
+        closed_ = true;     // 这个标志位一定要放在前面，避免多线程重复进来调用close_cb_
         if(close_cb_)
         {
             close_cb_(std::dynamic_pointer_cast<TcpConnection>(shared_from_this()));
@@ -188,7 +188,7 @@ void TcpConnection::Send(const char *buf, size_t size)
 void TcpConnection::OnTimeout()
 {
     NETWORK_ERROR << "host: " << peer_addr_.ToIpPort() << " timeout and close it!";
-    std::cout << "host: " << peer_addr_.ToIpPort() << " timeout and close it!";
+    std::cout << "host: " << peer_addr_.ToIpPort() << " timeout and close it!" << std::endl;
     OnClose();
 }
 

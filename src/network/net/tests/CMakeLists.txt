@@ -11,4 +11,10 @@ add_executable(AcceptorTest AcceptorTest.cpp)
 target_link_libraries(AcceptorTest base network)
 
 add_executable(TcpConnectionTest TcpConnectionTest.cpp)
-target_link_libraries(TcpConnectionTest base network jsoncpp.a)
+target_link_libraries(TcpConnectionTest base network)
+
+add_executable(TcpServerTest TcpServerTest.cpp)
+target_link_libraries(TcpServerTest base network)
+
+add_executable(TcpClientTest TcpClientTest.cpp)
+target_link_libraries(TcpClientTest base network)
