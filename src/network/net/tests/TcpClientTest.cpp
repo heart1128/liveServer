@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 13:52:45
+ * @LastEditTime: 2024-06-09 16:25:35
  * @FilePath: /tmms/src/network/net/tests/TcpClientTest.cpp
  * @Description:  learn 
  */
@@ -58,6 +58,9 @@ int main()
         client->SetConnectCallback([](const TcpConnectionPtr& con, bool connected){
             if(connected)
             {
+                // 小端转大端
+                auto size = htonl(strlen(http_request));
+                con->Send((const char*)&size, sizeof(size));
                 con->Send(http_request, strlen(http_request));
             }
         });

@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 14:46:21
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-01 15:22:43
- * @FilePath: /liveServer/src/base/StringUtils.cpp
+ * @LastEditTime: 2024-06-09 15:51:49
+ * @FilePath: /tmms/src/base/StringUtils.cpp
  * @Description:  learn 
  */
 #include "StringUtils.h"
@@ -159,5 +159,48 @@ vector<string> StringUtils::SplitString(const string &s, const string &delimiter
         result.emplace_back(s.substr(last));        // 不指定长度，默认到最后
     }
 
+    return result;
+}
+
+vector<string> StringUtils::SplitStringWithFSM(const string &s, const char delimiter)
+{
+    enum
+    {
+        kStateInit = 0,
+        kStateNormal = 1,
+        kStateDelimiter = 2,
+        kStateEnd = 3,
+    };
+
+    int state = kStateInit;
+    vector<string> result;          // 这个临时变量如果是返回的，编译器会进行优化，空间申请在返回值内，不会有额外的复制开销
+    std::string tmp;
+
+    state = kStateNormal;
+    for(int pos = 0; pos < s.size();)
+    {
+        if(state == kStateNormal)
+        {
+            if(s.at(pos) == delimiter)      // 分隔符状态转移，跳过字符
+            {
+                state = kStateDelimiter;
+                continue;
+            }
+            tmp.push_back(s.at(pos));   // 非分隔符，保存字符
+            pos++;
+        }
+        else if(state == kStateDelimiter)       // 上一个状态是分隔符状态，这里就要保存上一段字符，然后重新找分隔符
+        {
+            result.push_back(tmp);  // 空的tmp也加进去，
+            tmp.clear();
+            state = kStateNormal;
+            pos++;
+        }
+    }
+    if(!tmp.empty())    // 可能最后是一个分隔符
+    {
+        result.push_back(tmp);
+    }
+    state = kStateEnd;
     return result;
 }

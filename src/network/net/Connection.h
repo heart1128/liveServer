@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-08 08:55:06
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 09:09:54
+ * @LastEditTime: 2024-06-09 16:20:25
  * @FilePath: /tmms/src/network/net/Connection.h
  * @Description:  learn 
  */
@@ -36,7 +36,7 @@ namespace tmms
 
         enum
         {
-            kNoirmalContext = 0,
+            kNormalContext = 0,
             kRtmpContext,       // rtmp
             kHttpContext,       // http
             kUserContext,
@@ -93,8 +93,8 @@ namespace tmms
             {
                 return std::shared_ptr<T>();
             }
-
-            return std::dynamic_pointer_cast<T>(iter->second);
+            // 同级转换，如果用动态转换就是上下级转换
+            return std::static_pointer_cast<T>(iter->second);
         }
 
     } // namespace network
