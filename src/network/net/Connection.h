@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-08 08:55:06
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-09 09:09:54
+ * @FilePath: /tmms/src/network/net/Connection.h
+ * @Description:  learn 
+ */
 #pragma once
 #include "network/base/InetAddress.h"
 #include "network/net/Event.h"
@@ -12,6 +20,20 @@ namespace tmms
     using namespace base;
     namespace network
     {
+
+        struct BufferNode   // buffer的存储节点
+        {
+            using ptr = std::shared_ptr<BufferNode>;
+
+            BufferNode(void *buf, size_t s)
+            :addr(buf), size(s)
+            {}
+            void *addr {nullptr};
+            size_t size {0};
+        };
+
+        using BufferNodePtr = std::shared_ptr<BufferNode>;
+
         enum
         {
             kNoirmalContext = 0,

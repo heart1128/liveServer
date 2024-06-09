@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-07 10:01:01
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-08 09:32:10
+ * @LastEditTime: 2024-06-09 09:09:43
  * @FilePath: /tmms/src/network/net/TcpConnection.h
  * @Description:  learn 
  */
@@ -27,20 +27,6 @@ namespace tmms
         using MessageCallback = std::function<void(const TcpConnectionPtr&, MsgBuffer&)>;
         using WriteCompleteCallback = std::function<void(const TcpConnectionPtr&)>;
         using TimeoutCallback = std::function<void(const TcpConnectionPtr&)>;
-        
-
-        struct BufferNode   // buffer的存储节点
-        {
-            using ptr = std::shared_ptr<BufferNode>;
-
-            BufferNode(void *buf, size_t s)
-            :addr(buf), size(s)
-            {}
-            void *addr {nullptr};
-            size_t size {0};
-        };
-
-        using BufferNodePtr = std::shared_ptr<BufferNode>;
 
         class TcpConnection : public Connection
         {
