@@ -1,0 +1,5 @@
+add_executable(HandShakeClientTest HandShakeClientTest.cpp)
+target_link_libraries(HandShakeClientTest base network mmedia crypto) # cryto是openssl的加密库
+
+add_executable(HandShakeServerTest HandShakeServerTest.cpp)
+target_link_libraries(HandShakeServerTest base network mmedia crypto)

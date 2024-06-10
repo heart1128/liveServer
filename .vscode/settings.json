@@ -70,6 +70,7 @@
         "netfwd": "cpp",
         "socket": "cpp",
         "timer": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "cinttypes": "cpp"
     }
 }

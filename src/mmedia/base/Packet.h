@@ -34,6 +34,7 @@ namespace tmms
          * packet 保存音视频的packet，分配内存等
          * 
         */
+        class Packet;
         using PacketPtr = std::shared_ptr<Packet>;
 #pragma pack(push)  // 保存字节对齐状态
 #pragma pack(1)     // 因为编译器会自动对齐类字节，所以这里设置成1字节对齐节省空间
