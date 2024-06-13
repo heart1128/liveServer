@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 20:18:59
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-10 09:28:08
+ * @LastEditTime: 2024-06-10 14:54:06
  * @FilePath: /tmms/src/mmedia/rtmp/RtmpHandShake.h
  * @Description:  learn 
  */
@@ -39,11 +39,14 @@ namespace tmms
             kHandShakeDone,
         };
 
+        class RtmpHandShake;
+
+        using RtmpHandShakePtr = std::shared_ptr<RtmpHandShake>;
         class RtmpHandShake
         {
         public:
             // 因为要区分服务端和客户端 
-            RtmpHandShake(const TcpConnectionPtr &conn, bool client);
+            RtmpHandShake(const TcpConnectionPtr &conn, bool client=false);
             ~RtmpHandShake() = default;
         
         public:

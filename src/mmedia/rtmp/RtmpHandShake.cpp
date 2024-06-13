@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 20:19:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-10 14:30:42
+ * @LastEditTime: 2024-06-13 10:12:51
  * @FilePath: /tmms/src/mmedia/rtmp/RtmpHandShake.cpp
  * @Description:  learn 
  * 
@@ -297,6 +297,7 @@ void RtmpHandShake::CreateC2S2(const char *data, int bytes, int offset)
     }
 }
 
+
 /// @brief 一般可以不检测，S1S2之后就可以发数据了
 /// @param data 
 /// @param bytes 
@@ -335,6 +336,7 @@ int32_t RtmpHandShake::HandShake(MsgBuffer &buf)
     {
         case kHandShakeWaitC0C1:        // 服务端等待客户端发送C0C1，收到就是进行检测，处理，然后发送S0S1
         {
+            
             if(buf.ReadableBytes() < 1537)  // 数据不够C0C1 + S0S1
             {
                 return 1;
@@ -352,7 +354,7 @@ int32_t RtmpHandShake::HandShake(MsgBuffer &buf)
             }
             else
             {
-                RTMP_TRACE << "host : " << connection_->PeerAddr().ToIpPort() << ",check C0C1 error\n";
+                RTMP_ERROR << "host : " << connection_->PeerAddr().ToIpPort() << ",check C0C1 error\n";
                 return -1;
             }
             break;
@@ -369,6 +371,7 @@ int32_t RtmpHandShake::HandShake(MsgBuffer &buf)
                 buf.Retrieve(1536);
                 RTMP_TRACE << "host : " << connection_->PeerAddr().ToIpPort() << ", handshake done\n";
                 state_ = kHandShakeDone; // 完成
+                return 0;
             }
             else
             {
@@ -399,7 +402,7 @@ int32_t RtmpHandShake::HandShake(MsgBuffer &buf)
                     state_ = kHandShakeDoning;  // 等待C2发送完
                     buf.Retrieve(1536);
                     SendC2S2();
-                    return 2;
+                    return 0;
                 }
                 else
                 {
@@ -415,7 +418,7 @@ int32_t RtmpHandShake::HandShake(MsgBuffer &buf)
             break;
         }
     }
-    return 0;
+    return 1;
 }
 
 /// @brief 客户端和服务端的发送完成状态

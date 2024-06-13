@@ -1,8 +1,8 @@
 /*
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 16:30:36
- * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 17:06:36
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2024-06-12 16:48:30
  * @FilePath: /tmms/src/mmedia/base/Packet.h
  * @Description:  learn 
  */
@@ -134,7 +134,7 @@ namespace tmms
             int32_t index_{-1};         // 读取的下标
             uint64_t timestamp_{0};     // 时间戳
             uint32_t capacity_{0};      // packet的容量
-            std::shared_ptr<void> ext_; // 额外数据的指针
+            std::shared_ptr<void> ext_; // 指向rtmp数据包
         };
 
         template <typename T>
