@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-12 14:59:42
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-16 10:11:17
+ * @LastEditTime: 2024-06-16 17:46:00
  */
 #pragma once
 
@@ -70,6 +70,8 @@ namespace tmms
             void HandleChunkSize(PacketPtr &packet);
             void HandleAckWindowSize(PacketPtr &packet);
             void HandleUserMessage(PacketPtr &packet);
+            // AMF相关
+            void HandleAmfCommand(PacketPtr &data, bool amf3);
 
         private:
             bool BuildChunk(PacketPtr &&packet, uint32_t timestamp = 0, bool fmt0 = false);

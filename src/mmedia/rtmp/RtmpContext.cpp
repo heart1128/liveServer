@@ -4,12 +4,13 @@
  * @Autor: 
  * @Date: 2024-06-12 15:07:06
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-16 10:31:12
+ * @LastEditTime: 2024-06-16 17:51:31
  */
 #include "RtmpContext.h"
 #include "mmedia/base/MMediaLog.h"
 #include "mmedia/base/BytesReader.h"
 #include "mmedia/base/BytesWriter.h"
+#include "mmedia/rtmp/amf/AMFObject.h"
 
 using namespace tmms::mm;
 
@@ -299,6 +300,16 @@ void RtmpContext::MessageComplete(PacketPtr &&data)
         case kRtmpMsgTypeWindowACKSize:
         {
             HandleAckWindowSize(data);
+            break;
+        }
+        case kRtmpMsgTypeAMF3Message:       // AMF3
+        {
+            HandleAmfCommand(data, true);
+            break;
+        }
+        case kRtmpMsgTypeAMFMessage:        // AMF0
+        {
+            HandleAmfCommand(data, false);
             break;
         }
         default:
@@ -737,6 +748,30 @@ void RtmpContext::HandleUserMessage(PacketPtr &packet)
     }
 }
 
+void RtmpContext::HandleAmfCommand(PacketPtr &data, bool amf3)
+{
+    RTMP_TRACE << "amf message len:" << data->PakcetSize() << " host:" << connection_->PeerAddr().ToIpPort();
+
+    const char *body = data->Data();
+    int32_t msg_len = data->PakcetSize();
+
+    // amf3在开头多了一个字节，表示是amf3，剩下的就是amf0
+    if(amf3)
+    {
+        body += 1;
+        msg_len -= 1;
+    }
+
+    AMFObject obj;
+    if(obj.Decode(body, msg_len) < 0)
+    {
+        RTMP_ERROR << "amf decode failed. host:" << connection_->PeerAddr().ToIpPort();
+        return;
+    }
+    obj.Dump();
+
+}
+
 bool RtmpContext::BuildChunk(PacketPtr &&packet, uint32_t timestamp, bool fmt0)
 {
     RtmpMsgHeaderPtr header = packet->Ext<RtmpMsgHeader>();
@@ -930,3 +965,4 @@ void RtmpContext::PushOutQueue(PacketPtr &&packet)
     out_waiting_queue_.push_back(std::move(packet));
     Send();
 }
+
