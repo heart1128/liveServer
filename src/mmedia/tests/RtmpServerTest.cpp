@@ -2,8 +2,8 @@
 /*
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
- * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-10 16:29:07
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2024-06-16 10:33:06
  * @FilePath: /tmms/src/mmedia/tests/RTMPServerTest.cpp
  * @Description:  learn 
  */
@@ -34,7 +34,7 @@ int main()
 
     if(loop)
     {
-        InetAddress listen("10.101.128.69:1935");
+        InetAddress listen("10.144.0.1:1935");
         RtmpServer server(loop, listen);
         // 整个Rtmp的回调都设置在里面了，直接启动就行
         // rtmp设置自己的业务流程回调函数到tcpServer中
