@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:45:22
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-07 16:09:50
+ * @LastEditTime: 2024-06-22 19:09:17
  * @FilePath: /tmms/src/network/net/EventLoop.h
  * @Description:  learn 
  */
@@ -21,6 +21,7 @@ namespace tmms
 {
     namespace network
     {
+        using EventPtr = std::shared_ptr<Event>;
         using Func = std::function<void()>;
         class EventLoop
         {
@@ -41,14 +42,14 @@ namespace tmms
             void AssertInLoopThread();  // 是否在同一个循环 
             bool IsInLoopThread() const;
             void RunInLoop(const Func& f);
-            void RunInLoop(const Func &&f);
+            void RunInLoop(Func &&f);
 
             // 时间轮
             void InsertEntry(uint32_t delay, EntryPtr entryPtr);   // 插入entry，设置超时时间
             void RunAfter(double delay, const Func &cb);    // 设置延迟多少时间执行
-            void RunAfter(double delay, const Func &&cb);
+            void RunAfter(double delay, Func &&cb);
             void RunEvery(double interval, const Func &cb);// 每隔一段时间就执行一遍
-            void RunEvery(double interval, const Func &&cb);
+            void RunEvery(double interval, Func &&cb);
         
         private:
             void RunFunctions();

@@ -4,11 +4,14 @@
  * @Autor: 
  * @Date: 2024-06-16 15:18:01
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-16 17:30:50
+ * @LastEditTime: 2024-06-18 22:30:10
  */
 #include "AMFAny.h"
 #include "mmedia/base/MMediaLog.h"
 #include "mmedia/base/BytesReader.h"
+#include "mmedia/base/BytesWriter.h"
+#include <cstring>
+#include <netinet/in.h>
 
 using namespace tmms::mm;
 
@@ -118,6 +121,21 @@ int32_t AMFAny::Count() const
     return 1;
 }
 
+/// @brief  用于将一个双精度浮点数 value 写入到字符数组 buf 中，用于发送，要转换成网络大端
+/// @param buf 
+/// @param value 
+/// @return 写入的字节数
+int AMFAny::WriteNumber(char *buf, double value)
+{
+    uint64_t res;
+    uint64_t in;
+    memcpy(&in, &value, sizeof(double));
+    // __bswap_64 是一个系统级的函数或宏（通常是宏），用于将 64 位整数 in 的字节序从主机字节序转换为网络字节序（大端字节序）。
+    res = __bswap_64(in);
+    memcpy(buf, &res, 8);
+    return 8;
+}
+
 /// @brief 解析string类型的数据
 /// @param data 
 /// @return string数据
@@ -132,4 +150,83 @@ std::string AMFAny::DecodeString(const char *data)
         return str;
     }
     return std::string();
+}
+
+int32_t AMFAny::EncodeName(char *output, const std::string &name)
+{
+    char *old = output;
+    auto len = name.size();
+    unsigned short length = htons(len);
+    memcpy(output, &length, 2);
+    output += 2;
+    
+    memcpy(output, name.c_str(), len);
+    output += len;
+    return len+2;
+}
+
+/// @brief 封装Number
+/// @param output
+/// @param dVal
+/// @return 写入的字节数
+int32_t AMFAny::EncodeNumber(char *output, double dVal)
+{
+    char *p = output;
+    *p++ = kAMFNumber;  // 一个字节的类型
+    p += WriteNumber(p, dVal); // 8个字节数据
+    return p - output;
+}
+
+/// @brief 都是规定好格式的
+/// @param output 
+/// @param str 
+/// @return 
+int32_t AMFAny::EncodeString(char *output, const std::string &str)
+{
+    char *p = output;
+    auto len = str.size();
+    *p++ = kAMFString;  // 一字节类型
+    p += BytesWriter::WriteUint16T(p, len); // 2字节数据长度
+    memcpy(p, str.c_str(), len);
+    p += len;
+    return p - output;
+}
+
+int32_t AMFAny::EncodeBoolean(char *output, bool b)
+{
+    char *p = output;
+    *p++ = kAMFBoolean;
+    *p++ = b ? 0x01 : 0x00;
+    return p - output;
+}
+
+int32_t AMFAny::EncodeNamedBoolean(char *output, const std::string &name, bool bVal)
+{
+    char *old = output;
+    output += EncodeName(output, name);
+    output += EncodeBoolean(output, bVal);
+    return output - old;
+}
+
+/// @brief 带属性名键值对的
+/// @param output 
+/// @param name 
+/// @param dVal 
+/// @return 
+int32_t AMFAny::EncodeNamedNumber(char *output, const std::string &name, double dVal)
+{
+    char *old = output;
+
+    output += EncodeName(output, name); // 先写name
+    output += EncodeNumber(output, dVal);
+    return output - old;
+}
+
+int32_t AMFAny::EncodeNamedString(char *output, const std::string &name, const std::string &str)
+{
+    char *old = output;
+
+    output += EncodeName(output, name); // 先写name
+    output += EncodeString(output, str);
+    return output - old;
 }

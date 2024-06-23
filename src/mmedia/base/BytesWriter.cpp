@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-12 16:09:56
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-13 11:24:31
+ * @LastEditTime: 2024-06-22 20:04:25
  */
 #include "BytesWriter.h"
 #include <netinet/in.h>
@@ -30,7 +30,7 @@ int BytesWriter::WriteUint24T(char *buf, uint32_t val)
 
 int BytesWriter::WriteUint16T(char *buf, uint16_t val)
 {
-    val = htonl(val);
+    val = htons(val);
     memcpy(buf, &val, sizeof(int16_t));
     return sizeof(int16_t);
 }

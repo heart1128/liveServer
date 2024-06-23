@@ -3,8 +3,8 @@
  * @Version: 0.1
  * @Autor: 
  * @Date: 2024-06-12 14:59:42
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-16 17:46:00
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-23 09:48:35
  */
 #pragma once
 
@@ -12,6 +12,7 @@
 #include "RtmpHandShake.h"
 #include "RtmpHandler.h"
 #include "RtmpHeader.h"
+#include "amf/AMFObject.h"
 #include <cstdint>
 #include <unordered_map>
 
@@ -41,6 +42,7 @@ namespace tmms
         };
 
 
+        using CommandFunc = std::function<void (AMFObject &obj)>;
         class RtmpContext   // rtmp上下文
         {
         public:
@@ -50,7 +52,7 @@ namespace tmms
         public:
             int32_t Parse(MsgBuffer &buf);
             void OnWriteComplete();
-            void StarHandShake();
+            void StartHandShake();
             // 接收数据解析
             int32_t ParseMessage(MsgBuffer &buf);
             void MessageComplete(PacketPtr && data);
@@ -61,7 +63,7 @@ namespace tmms
             // 控制消息
                 // 发送 rtmp控制消息
             void SendSetChunkSize();        // 块大小
-            void SendAckWindowsSize();      // 确认窗口大小
+            void SendAckWindowSize();      // 确认窗口大小
             void SendSetPeerBandwidth();    // 带宽，和窗口大小值是一样的
             void SendBytesRecv(); // 发送消息
                 // 用户控制消息
@@ -71,7 +73,29 @@ namespace tmms
             void HandleAckWindowSize(PacketPtr &packet);
             void HandleUserMessage(PacketPtr &packet);
             // AMF相关
-            void HandleAmfCommand(PacketPtr &data, bool amf3);
+            void HandleAmfCommand(PacketPtr &data, bool amf3 = false);
+            // NetConnection相关 服务端和客户端之间进行网络连接的高级表现形式
+            void SendConnect();
+            void HandleConnect(AMFObject &obj);
+
+            // NetStream相关， 传输音视频的命令消息
+                // 直播，只实现了play和publish
+            void SendCreateStream();
+            void HandleCreateStream(AMFObject &obj);
+            /// @brief 服务器通过发送onStatus给客户端通知网络流的状态更新
+            /// @param level  info object，至少有三个参数
+            /// @param code 
+            /// @param description 
+            void SendStatus(const std::string &level, const std::string &code, const std::string &description);
+    
+            void SendPlay(); // 客户端使用
+            void HandlePlay(AMFObject &obj); // 服务端处理
+            void ParseNameAndTcUrl(); // 解析名称和推流地址
+            void SendPublish();  // 客户端发送命令，发布一个有名字的流到服务器，其他客户端可以用名字进行拉流
+            void HandlePublish(AMFObject &obj);
+                // 对端收到Netconnection命令消息之后，进行回复，用_result或者_error回复
+            void HandleResult(AMFObject &obj);
+            void HandleError(AMFObject &obj);
 
         private:
             bool BuildChunk(PacketPtr &&packet, uint32_t timestamp = 0, bool fmt0 = false);
@@ -101,7 +125,18 @@ namespace tmms
             int32_t ack_size_{2500000};     // 确认窗口
             int32_t in_bytes_{0};           // 接收到的数据
             int32_t last_left_{0};          // 剩下的数据
-            
+            ///////// netConnect
+            // 例子  rtmps://server-address:port/app-name/stream-name?key1=value1&key2=value2
+            std::string app_;   // 推流点 app-name
+            std::string tc_url_; // 推流url  rtmps://server-address:port/app-name/stream-name。
+            std::string name_;  // 推流名 stream-name，推流名称，用于唯一标识正在推送的流。
+            std::string session_name_; // server-address:port/app-name/stream-name?key1=value1&key2=value2
+            std::string param_;  // 推流参数
+            bool is_player_{false}; // 是不是一个播放客户端
+
+            // 保存所有命令的回调（connect之类的）
+            std::unordered_map<std::string, CommandFunc> commands_;
+            bool is_client_{false};
         };
 
         using RtmpContextPtr = std::shared_ptr<RtmpContext>;

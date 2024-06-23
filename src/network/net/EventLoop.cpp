@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:47:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-07 17:21:36
+ * @LastEditTime: 2024-06-22 19:44:34
  * @FilePath: /tmms/src/network/net/EventLoop.cpp
  * @Description:  learn 
  */
@@ -267,7 +267,7 @@ void EventLoop::RunInLoop(const Func &f)
 
 /// @brief 保证回调函数是和loop在一个线程内，是就立刻执行，不是加到任务队列在Loop中执行
 /// @param f 
-void EventLoop::RunInLoop(const Func &&f)
+void EventLoop::RunInLoop(Func &&f)
 {
     if(IsInLoopThread())
     {
@@ -314,7 +314,7 @@ void EventLoop::RunAfter(double delay, const Func &cb)
 /// @brief 设置delay秒之后执行cb任务
 /// @param delay 单位：s
 /// @param cb void()类型的回调函数
-void EventLoop::RunAfter(double delay, const Func &&cb)
+void EventLoop::RunAfter(double delay, Func &&cb)
 {
     if(IsInLoopThread())
     {
@@ -342,7 +342,7 @@ void EventLoop::RunEvery(double interval, const Func &cb)
     }  
 }
 
-void EventLoop::RunEvery(double interval, const Func &&cb)
+void EventLoop::RunEvery(double interval, Func &&cb)
 {
     if(IsInLoopThread())
     {

@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-10 14:43:04
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-13 10:14:16
+ * @LastEditTime: 2024-06-22 19:58:20
  */
 #include "RtmpServer.h"
 #include "mmedia/base/MMediaLog.h"
@@ -49,7 +49,7 @@ void RtmpServer::OnNewConnection(const TcpConnectionPtr &conn)
     // 2. 处理rtmp服务端连接
     RtmpContextPtr shake = std::make_shared<RtmpContext>(conn, nullptr);
     conn->SetContext(kRtmpContext, shake);
-    shake->StarHandShake(); // 等待C0C1
+    shake->StartHandShake(); // 等待C0C1
 }
 
 void RtmpServer::OnConnectionDestroy(const TcpConnectionPtr &conn)
@@ -71,8 +71,9 @@ void RtmpServer::OnMessage(const TcpConnectionPtr &conn, MsgBuffer &buf)
     // RtmpHandShakePtr shake = conn->GetContext<RtmpHandShake>(kRtmpContext);
     if(shake)
     {   
+        
         // int ret = shakehand->HandShake(buf); // 开始握手
-        int ret = shake->Parse(buf); // 开始握手
+        int ret = shake->Parse(buf); // 开始解析，握手，命令或消息
         if(ret == 0)        // 0握手成功
         {
             RTMP_DEBUG << "host: " << conn->PeerAddr().ToIpPort() << " handshake success.";

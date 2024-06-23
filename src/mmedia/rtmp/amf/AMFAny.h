@@ -1,3 +1,11 @@
+/*
+ * @Description: 
+ * @Version: 0.1
+ * @Autor: 
+ * @Date: 2024-06-16 15:16:33
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2024-06-18 22:29:28
+ */
 #pragma once
 
 #include <memory>
@@ -67,10 +75,20 @@ namespace tmms
 
             virtual void Dump() const = 0;
             const std::string &Name() const;
-            virtual int32_t Count() const;
+            int32_t Count() const;
+            // 数据封装，都是根据协议写入的
+            static int32_t EncodeName(char *output, const std::string &name);
+            static int32_t EncodeNumber(char *output, double dVal);
+            static int32_t EncodeString(char *output, const std::string &str);
+            static int32_t EncodeBoolean(char *output, bool b);
+            static int32_t EncodeNamedBoolean(char *output, const std::string &name, bool bVal);
+            static int32_t EncodeNamedNumber(char *output, const std::string &name, double dVal);
+            static int32_t EncodeNamedString(char *output, const std::string &name, const std::string &str);
 
         protected:
+            static int WriteNumber(char *buf, double value);
             static std::string DecodeString(const char *data);
+
         private:
             std::string name_;
         };

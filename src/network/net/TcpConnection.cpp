@@ -102,6 +102,7 @@ void TcpConnection::OnWrite()
         return;
     }
 
+    ExtendLife(); // 有写操作，连接不是无效的
     if(!io_vec_list_.empty())
     {
         while(true) // 不断发
@@ -188,7 +189,7 @@ void TcpConnection::Send(const char *buf, size_t size)
 void TcpConnection::OnTimeout()
 {
     NETWORK_ERROR << "host: " << peer_addr_.ToIpPort() << " timeout and close it!";
-    std::cout << "host: " << peer_addr_.ToIpPort() << " timeout and close it!" << std::endl;
+    std::cout << "\nhost: " << peer_addr_.ToIpPort() << " timeout and close it!" << std::endl;
     OnClose();
 }
 
@@ -300,7 +301,6 @@ void TcpConnection::SendInLoop(std::list<BufferNode::ptr> &list)
         EnableWriting(true);
     }
 }
-
 
 
 void TcpConnection::OnError(const std::string &msg)

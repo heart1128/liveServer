@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 16:30:36
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-13 11:00:15
- * @FilePath: /tmms/src/mmedia/base/Packet.h
+ * @LastEditTime: 2024-06-22 20:00:09
+ * @FilePath: /tmms/src/mmedia_bak/base/Packet.h
  * @Description:  learn 
  */
 #pragma once
@@ -75,7 +75,7 @@ namespace tmms
                 return type_ == kPacketTypeMeta3;
             }
 
-            int32_t PakcetSize() const
+            int32_t PacketSize() const
             {
                 return size_;
             }
