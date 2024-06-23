@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-08 08:56:30
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-08 08:59:23
- * @FilePath: /tmms/src/network/net/TcpClient.h
+ * @LastEditTime: 2024-06-23 11:26:03
+ * @FilePath: /tmms/src/network/TcpClient.h
  * @Description:  learn 
  */
 #pragma once
@@ -16,6 +16,7 @@ namespace tmms
 {
     namespace network
     {
+        using namespace tmms::network;
         enum
         {
             kTcpConStatusInit = 0,
@@ -23,7 +24,8 @@ namespace tmms
             kTcpConStatusConnected = 2,
             kTcpConStatusDisConnected = 3,
         };
-
+        class TcpClient;
+        using TcpClientPtr = std::shared_ptr<TcpClient>;
         using ConnectionCallback = std::function<void (const TcpConnectionPtr &con, bool)>; // 连接的是哪个tcpconnection，是否连接
 
         class TcpClient : public TcpConnection

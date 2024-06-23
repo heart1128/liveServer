@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-22 19:50:05
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-23 15:39:27
+ * @FilePath: /tmms/src/mmedia/rtmp/RtmpHandler.h
+ * @Description:  learn 
+ */
 #pragma once
 
 #include "mmedia/base/MMediaHandler.h"
@@ -19,6 +27,8 @@ namespace tmms
             virtual bool OnPause(const TcpConnectionPtr& conn, bool pause){return false;}
             // 定位(快进等)≈
             virtual void OnSeek(const TcpConnectionPtr& conn, double time){}
+            // 告知可以开始publish
+            virtual void OnPublishPrepare(const TcpConnectionPtr& conn){}
         };
     } // namespace mm
     

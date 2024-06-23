@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-12 14:59:42
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-23 09:48:35
+ * @LastEditTime: 2024-06-23 15:41:44
  */
 #pragma once
 
@@ -96,6 +96,10 @@ namespace tmms
                 // 对端收到Netconnection命令消息之后，进行回复，用_result或者_error回复
             void HandleResult(AMFObject &obj);
             void HandleError(AMFObject &obj);
+            void SetPacketType(PacketPtr &packet);
+            // 客户端，拉流和推流
+            void Play(const std::string &url);
+            void Publish(const std::string &url);
 
         private:
             bool BuildChunk(PacketPtr &&packet, uint32_t timestamp = 0, bool fmt0 = false);
@@ -136,7 +140,9 @@ namespace tmms
 
             // 保存所有命令的回调（connect之类的）
             std::unordered_map<std::string, CommandFunc> commands_;
-            bool is_client_{false};
+
+            // 客户端
+            bool is_client_{false}; // 标识客户端
         };
 
         using RtmpContextPtr = std::shared_ptr<RtmpContext>;

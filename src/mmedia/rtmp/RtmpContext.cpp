@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-12 15:07:06
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-23 09:42:57
+ * @LastEditTime: 2024-06-23 15:41:29
  */
 #include "RtmpContext.h"
 #include "mmedia/base/MMediaLog.h"
@@ -17,7 +17,7 @@
 using namespace tmms::mm;
 
 RtmpContext::RtmpContext(const TcpConnectionPtr &con, RtmpHandler *handler, bool client)
-:handshake_(con, client), connection_(con), rtmp_handler_(handler)
+:handshake_(con, client), connection_(con), rtmp_handler_(handler), is_client_(client)
 {
     commands_["connect"] = std::bind(&RtmpContext::HandleConnect, this, std::placeholders::_1);
     commands_["createStream"] = std::bind(&RtmpContext::HandleCreateStream, this, std::placeholders::_1);
@@ -81,6 +81,7 @@ void RtmpContext::OnWriteComplete()
     else if(state_ == kRtmpWatingDone)
     {
         state_ = kRtmpMessage;
+        // 可能是在中途完成了握手
         if(is_client_)
         {
             SendConnect();
@@ -285,6 +286,8 @@ int32_t RtmpContext::ParseMessage(MsgBuffer &buf)
     return 1;
 }
 
+/// @brief 解析完成数据之后，对应的命令控制类型消息进行处理，对应的音视频数据给业务层转发
+/// @param data 
 void RtmpContext::MessageComplete(PacketPtr &&data)
 {
     RTMP_TRACE << "recv message type : " << data->PacketType() << " len : " << data->PacketSize() << std::endl;
@@ -321,8 +324,21 @@ void RtmpContext::MessageComplete(PacketPtr &&data)
             HandleAmfCommand(data, false);
             break;
         }
+        case kRtmpMsgTypeMetadata: // 都是一样的转换视频
+        case kRtmpMsgTypeAMF3Meta:
+        case kRtmpMsgTypeAudio:  // 音频
+        case kRtmpMsgTypeVideo:  // 视频
+        {
+            SetPacketType(data); // 转换类型
+            // 给业务层包，数据已经解析过了
+            if(rtmp_handler_)
+            {
+                rtmp_handler_->OnRecv(connection_, data);
+            }
+            break;
+        }
         default:
-        RTMP_TRACE << " not surpport message type:" << type;
+            RTMP_TRACE << " not surpport message type:" << type;
         break;
     }
 }
@@ -653,6 +669,8 @@ void RtmpContext::SendUserCtrlMessage(short nType, uint32_t value1, uint32_t val
     {
          p += BytesWriter::WriteUint32T(body, value2);
     }
+    header->msg_len = p - body;
+    packet->SetPacketSize(header->msg_len);
     RTMP_DEBUG << "send control type:" << nType 
                 << " value1:" << value1 
                 << " value2:" << value2
@@ -1061,21 +1079,37 @@ void RtmpContext::ParseNameAndTcUrl()
     
     std::string domain;
     std::vector<std::string> list = base::StringUtils::SplitString(tc_url_, "/");
+    // 写文档的时候要有格式要求
     if(list.size() == 6) // rtmp://ip/domain:port/app/stream
     {
         domain = list[3];
         app_ = list[4];
         name_ = list[5];
     }
-    // 没有ip的情况
-    if(domain.empty() && tc_url_.size() > 7) // rtmp:// 7个字符
+    else if(list.size() == 5) // rtmp://domain:port/app/stream
     {
-        auto pos = tc_url_.find_first_of(":/", 7);  // 第一个冒号或斜杠
-        if(pos != std::string::npos)
-        {
-            domain = tc_url_.substr(7, pos);
-        }
+        domain = list[2];
+        app_ = list[3];
+        name_ = list[4];
     }
+
+    // 没有ip的情况，去掉domain的port
+    auto p = domain.find_first_not_of(":");
+    if(p != domain.npos)
+    {
+        domain = domain.substr(0, p);
+    }
+
+
+    // 没有ip的情况
+    // if(domain.empty() && tc_url_.size() > 7) // rtmp:// 7个字符
+    // {
+    //     auto pos = tc_url_.find_first_of(":/", 7);  // 第一个冒号或斜杠
+    //     if(pos != std::string::npos)
+    //     {
+    //         domain = tc_url_.substr(7, pos);
+    //     }
+    // }
     
     std::stringstream ss;
     session_name_.clear();
@@ -1162,6 +1196,14 @@ void RtmpContext::HandleResult(AMFObject &obj)
             SendPublish(); // 不是播放的，就是发布的
         }
     }
+    else if(id == 5) // publish发送的时候是5
+    {
+        if(rtmp_handler_)
+        {
+            // 准备好了，可以往conection写数据了
+            rtmp_handler_->OnPublishPrepare(connection_);
+        }
+    }
 }
 
 void RtmpContext::HandleError(AMFObject & obj)
@@ -1171,6 +1213,49 @@ void RtmpContext::HandleError(AMFObject & obj)
     RTMP_TRACE << "recv error description: "<< description << " host:" << connection_->PeerAddr().ToIpPort();
     connection_->ForceClose();
 }
+
+/// @brief 在收到packet的时候，里面保存的类型是rtmpmsg的类型，需要转换成packetType
+/// @param packet 
+void RtmpContext::SetPacketType(PacketPtr & packet)
+{
+    if(packet->PacketType() == kRtmpMsgTypeAudio)
+    {
+        packet->SetPacketType(kPacketTypeAudio);
+    }
+    if(packet->PacketType() == kRtmpMsgTypeVideo)
+    {
+        packet->SetPacketType(kPacketTypeVideo);
+    }
+    if(packet->PacketType() == kRtmpMsgTypeMetadata)   
+    {
+        packet->SetPacketType(kPacketTypeMeta);
+    }
+    if(packet->PacketType() == kRtmpMsgTypeAMF3Meta) // metadata3
+    {
+        packet->SetPacketType(kPacketTypeMeta3);
+    }
+}
+
+/// @brief 客户端拉流
+/// @param url 
+void RtmpContext::Play(const std::string &url)
+{
+    is_client_ = true;
+    is_player_ = true;
+    tc_url_ = url;
+    ParseNameAndTcUrl();
+}
+
+/// @brief 客户端推流
+/// @param url 
+void RtmpContext::Publish(const std::string &url)
+{
+    is_client_ = true;
+    is_player_ = false; // 推流
+    tc_url_ = url;
+    ParseNameAndTcUrl();
+}
+
 
 bool RtmpContext::BuildChunk(PacketPtr &&packet, uint32_t timestamp, bool fmt0)
 {

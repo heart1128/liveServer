@@ -149,7 +149,10 @@ vector<string> StringUtils::SplitString(const string &s, const string &delimiter
         {
             result.emplace_back(s.substr(last, next - last));   // 子串分割
         }
-
+        else
+        {
+            result.emplace_back("");    // 比如//之间的空字符串也要计算
+        }
         last = next + delimiter.size();
     }
 
