@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 16:12:24
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 14:20:39
+ * @LastEditTime: 2024-06-24 21:15:08
  * @FilePath: /tmms/src/main/main.cpp
  * @Description:  learn 
  */
@@ -34,6 +34,9 @@ void Test_config_and_rotate()
 
 int main(int argc, char* argv[])
 {
+    g_logger = new Logger(nullptr);
+    g_logger->SetLogLevel(KTrace);
+
     if(!sConfigMgr->LoadConfig("../config/config.json"))
     {
         std::cerr << "load config file failed." << std::endl;

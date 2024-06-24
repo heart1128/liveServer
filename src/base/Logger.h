@@ -29,7 +29,8 @@ namespace tmms
         class Logger : public NonCopyable
         {
         public:
-            Logger(FileLog::ptr &log);
+            Logger(FileLog::ptr log);
+            //Logger(FileLog::ptr &log);
             ~Logger() = default;
         
         public:

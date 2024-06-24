@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 18:20:04
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-02 14:37:07
- * @FilePath: /liveServer/src/base/Logger.cpp
+ * @LastEditTime: 2024-06-24 21:16:20
+ * @FilePath: /tmms/src/base/Logger.cpp
  * @Description:  learn 
  */
 #include "Logger.h"
@@ -11,10 +11,11 @@
 
 using namespace tmms::base;
 
-Logger::Logger(FileLog::ptr &log)
+Logger::Logger(FileLog::ptr log)
 :log_(log)
 {
 }
+
 
 /// @brief 设置日志等级
 /// @param level LogLevel枚举变量

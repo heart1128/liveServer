@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-02 14:08:28
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-02 14:44:04
- * @FilePath: /liveServer/src/base/FileMgr.cpp
+ * @LastEditTime: 2024-06-24 21:35:31
+ * @FilePath: /tmms/src/base/FileMgr.cpp
  * @Description:  learn 
  */
 #include "FileMgr.h"
@@ -133,6 +133,10 @@ void FileMgr::RotateDays(const FileLog::ptr &file)
         std::string file_ext = StringUtils::FileNameExt(file_path);
 
         std::ostringstream ss;
+        if(path.at(path.size() - 1) != '/')
+        {
+            path += '/';
+        }
         ss << path
             << file_name
             << buf
@@ -157,6 +161,10 @@ void FileMgr::RotateHours(FileLog::ptr &file)
         std::string file_ext = StringUtils::FileNameExt(file_path);
 
         std::ostringstream ss;
+        if(path.at(path.size() - 1) != '/')
+        {
+            path += '/';
+        }
         ss << path
             << file_name
             << buf
@@ -181,6 +189,10 @@ void FileMgr::RotateMinute(FileLog::ptr &file)
         std::string file_ext = StringUtils::FileNameExt(file_path);
 
         std::ostringstream ss;
+        if(path.at(path.size() - 1) != '/')
+        {
+            path += '/';
+        }
         ss << path
             << file_name
             << buf
