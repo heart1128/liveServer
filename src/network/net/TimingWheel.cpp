@@ -33,7 +33,7 @@ void TimingWheel::InstertEntry(uint32_t delay, EntryPtr entryPtr)
     {
         InstertMinuteEntry(delay, entryPtr);
     }
-    else if(delay < KTimingDay) // 小于1天，是小时
+    else if(delay < KTimingDay) // 小于1天，是小时 
     {
         InstertHourEntry(delay, entryPtr);
     }
