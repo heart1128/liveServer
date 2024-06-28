@@ -2,26 +2,29 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-27 23:34:06
- * @FilePath: /liveServer/src/mmedia/tests/RtmpClientTest.cpp
+ * @LastEditTime: 2024-06-28 00:08:44
+ * @FilePath: /liveServer/src/live/tests/CodecHeaderTest.cpp
  * @Description:  learn 
  */
 #include "network/net/EventLoop.h"
 #include "network/net/EventLoopThread.h"
-#include "network/base/InetAddress.h"
 #include "mmedia/rtmp/RtmpClient.h"
 #include "network/TcpClient.h"
+#include "live/CodecHeader.h"
+#include "live/base/CodecUtils.h"
 
 #include <iostream>
-#include <thread>
-#include <chrono>
+
 
 using namespace tmms::network;
 using namespace tmms::base;
 using namespace tmms::mm;
+using namespace tmms::live;
 
 EventLoopThread eventloop_thread;
 std::thread th;
+
+CodecHeader codec_header;
 
 class RtmpHandlerImpl : public RtmpHandler
 {
@@ -31,7 +34,7 @@ class RtmpHandlerImpl : public RtmpHandler
         // 推流
         bool OnPublish(const TcpConnectionPtr& conn, const std::string &session_name, const std::string &param){return false;}
         // 暂停
-        bool OnPause(const TcpConnectionPtr& conn, bool pause){return false;}
+        void OnPause(const TcpConnectionPtr& conn, bool pause){}
         // 定位(快进等)≈
         void OnSeek(const TcpConnectionPtr& conn, double time){}
 
@@ -45,11 +48,15 @@ class RtmpHandlerImpl : public RtmpHandler
         } // 连接断开的时候，业务层可以回收资源，注销用户等
         void OnRecv(const TcpConnectionPtr& conn, const PacketPtr &data) override
         {
-            std::cout << "recv type:" << data->PacketType() << " size:" << data->PacketSize() << std::endl;
+            // std::cout << "recv type:" << data->PacketType() << " size:" << data->PacketSize() << std::endl;
         }// 多媒体解析出来的数据，传给直播业务
         void OnRecv(const TcpConnectionPtr& conn, PacketPtr &&data) override
         {
-            std::cout << "recv type:" << data->PacketType() << " size:" << data->PacketSize() << std::endl;
+            // std::cout << "recv type:" << data->PacketType() << " size:" << data->PacketSize() << std::endl;
+            if(CodecUtils::IsCodecHeader(data))
+            {
+                codec_header.ParseCodecHeader(data);
+            }
         }
         void OnActive(const ConnectionPtr &conn) override
         {

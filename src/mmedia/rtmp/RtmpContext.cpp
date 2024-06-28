@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-12 15:07:06
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-23 15:41:29
+ * @LastEditTime: 2024-06-28 16:15:18
  */
 #include "RtmpContext.h"
 #include "mmedia/base/MMediaLog.h"
@@ -290,7 +290,7 @@ int32_t RtmpContext::ParseMessage(MsgBuffer &buf)
 /// @param data 
 void RtmpContext::MessageComplete(PacketPtr &&data)
 {
-    RTMP_TRACE << "recv message type : " << data->PacketType() << " len : " << data->PacketSize() << std::endl;
+    // RTMP_TRACE << "recv message type : " << data->PacketType() << " len : " << data->PacketSize() << std::endl;
     auto type = data->PacketType();
     switch (type)
     {
@@ -1226,7 +1226,7 @@ void RtmpContext::SetPacketType(PacketPtr & packet)
     {
         packet->SetPacketType(kPacketTypeVideo);
     }
-    if(packet->PacketType() == kRtmpMsgTypeMetadata)   
+    if(packet->PacketType() == kRtmpMsgTypeAMFMeta)   
     {
         packet->SetPacketType(kPacketTypeMeta);
     }

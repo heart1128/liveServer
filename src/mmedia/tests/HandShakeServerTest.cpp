@@ -3,8 +3,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-10 13:48:29
- * @FilePath: /tmms/src/mmedia/tests/HandShakeServerTest.cpp
+ * @LastEditTime: 2024-06-25 22:14:19
+ * @FilePath: /liveServer/src/mmedia/tests/HandShakeServerTest.cpp
  * @Description:  learn 
  */
 #include "network/net/EventLoop.h"
@@ -33,7 +33,7 @@ int main()
 
     if(loop)
     {
-        InetAddress listen("10.101.128.69:1935");
+        InetAddress listen("8.149.142.249:1935");
         TcpServer server(loop, listen);
 
         // 设置收到消息回调，直接解析消息的上下文

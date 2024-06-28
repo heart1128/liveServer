@@ -21,10 +21,10 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/lib64/)  # 添加查找lib的
 link_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/lib/)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)  #STREQUAL是字符串比较的运算符  debug 要调试信息 -g -pipi使用管道加快编译速度
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0 -g -pipe -Wall -Werror -Wno-unused-variable -lrt -pthread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0 -g -pipe -Wall -Werror -Wno-unused-variable -Wno-deprecated-declarations -lrt -pthread")
 elseif (NOT CMAKE_BUILD_TYPE STREQUAL Debug) # 不是debug，那就是Release，-o3启动所有的编译器优化
     message(STATUS "Release Version")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -g -pipe -Wall -Werror -Wno-unused-variable -lrt -pthread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -g -pipe -Wall -Werror -Wno-unused-variable -Wno-deprecated-declarations -lrt -pthread")
 endif()
 
 # -fno-strict-aliasing：

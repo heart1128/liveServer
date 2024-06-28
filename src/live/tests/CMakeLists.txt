@@ -1,0 +1,2 @@
+add_executable(CodecHeaderTest CodecHeaderTest.cpp)
+target_link_libraries(CodecHeaderTest base network live mmedia crypto)

@@ -2,9 +2,9 @@
 /*
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-20 21:58:46
- * @FilePath: /tmms/src/mmedia/tests/RTMPServerTest.cpp
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-27 23:26:03
+ * @FilePath: /liveServer/src/mmedia/tests/RtmpServerTest.cpp
  * @Description:  learn 
  */
 #include "network/net/EventLoop.h"
@@ -34,7 +34,8 @@ int main()
 
     if(loop)
     {
-        InetAddress listen("10.144.0.1:1935");
+        InetAddress listen("172.27.218.130:1935");
+        std::cout << "addr : " << listen.ToIpPort() << std::endl;
         RtmpServer server(loop, listen);
         // 整个Rtmp的回调都设置在里面了，直接启动就行
         // rtmp设置自己的业务流程回调函数到tcpServer中
