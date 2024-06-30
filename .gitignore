@@ -29,7 +29,8 @@
 *.app
 
 build/*
-bin/*
+bin/sbin/*
+bin/logs/*
 lib/*
 
 third_party/jsoncpp-build/*

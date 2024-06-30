@@ -3,8 +3,8 @@
  * @Version: 0.1
  * @Autor: 
  * @Date: 2024-06-16 15:16:33
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-18 22:29:28
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-29 23:11:23
  */
 #pragma once
 
@@ -72,6 +72,7 @@ namespace tmms
             virtual bool IsBoolean();
             virtual bool IsDate();
             virtual bool IsObject();
+            virtual bool IsNull();
 
             virtual void Dump() const = 0;
             const std::string &Name() const;

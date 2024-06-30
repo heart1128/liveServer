@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-23 18:10:32
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-23 18:17:43
- * @FilePath: /tmms/src/base/AppInfo.h
+ * @LastEditTime: 2024-06-28 17:47:53
+ * @FilePath: /liveServer/src/base/AppInfo.h
  * @Description:  learn 
  */
 #pragma once
@@ -16,6 +16,9 @@ namespace tmms
     namespace base
     {
         class DomainInfo;
+        class AppInfo;
+        
+        using AppInfoPtr = std::shared_ptr<AppInfo>;
         class AppInfo
         {
         public:

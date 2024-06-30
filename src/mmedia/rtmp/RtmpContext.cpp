@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-12 15:07:06
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-28 16:15:18
+ * @LastEditTime: 2024-06-30 12:19:15
  */
 #include "RtmpContext.h"
 #include "mmedia/base/MMediaLog.h"
@@ -324,7 +324,7 @@ void RtmpContext::MessageComplete(PacketPtr &&data)
             HandleAmfCommand(data, false);
             break;
         }
-        case kRtmpMsgTypeMetadata: // 都是一样的转换视频
+        case kRtmpMsgTypeAMFMeta: // 都是一样的转换视频
         case kRtmpMsgTypeAMF3Meta:
         case kRtmpMsgTypeAudio:  // 音频
         case kRtmpMsgTypeVideo:  // 视频
@@ -333,7 +333,7 @@ void RtmpContext::MessageComplete(PacketPtr &&data)
             // 给业务层包，数据已经解析过了
             if(rtmp_handler_)
             {
-                rtmp_handler_->OnRecv(connection_, data);
+                rtmp_handler_->OnRecv(connection_, std::move(data));
             }
             break;
         }
@@ -401,7 +401,7 @@ bool RtmpContext::BuildChunk(const PacketPtr &packet, uint32_t timestamp, bool f
         if(fmt == kRtmpFmt0)
         {
             p += BytesWriter::WriteUint24T(p, ts); // ts 3字节
-            p += BytesWriter::WriteUint24T(p, header->msg_type); // msg_len 3字节
+            p += BytesWriter::WriteUint24T(p, header->msg_len); // msg_len 3字节
             p += BytesWriter::WriteUint8T(p, header->msg_type);
             
             memcpy(p, &header->msg_sid, 4);     // streamid传输也是小端存放，不需要转换
@@ -411,7 +411,7 @@ bool RtmpContext::BuildChunk(const PacketPtr &packet, uint32_t timestamp, bool f
         else if(fmt == kRtmpFmt1)       // 没有streamid
         {
             p += BytesWriter::WriteUint24T(p, ts); // ts 3字节
-            p += BytesWriter::WriteUint24T(p, header->msg_type); // msg_len 3字节
+            p += BytesWriter::WriteUint24T(p, header->msg_len); // msg_len 3字节
             p += BytesWriter::WriteUint8T(p, header->msg_type);
             out_deltas_[header->cs_id] = timestamp;
         }
@@ -725,9 +725,8 @@ void RtmpContext::HandleUserMessage(PacketPtr &packet)
     char* body = packet->Data();
     // 1.解析类型
     auto type = BytesReader::ReadUint16T(body);
-    body += 2;
     // 2.解析用户数据 4字节
-    auto value = BytesReader::ReadUint32T(body);
+    auto value = BytesReader::ReadUint32T(body + 2);
 
     RTMP_TRACE << "recv user control type:" << value << " host :" << connection_->PeerAddr().ToIpPort();
     switch (type)
@@ -1065,63 +1064,50 @@ void RtmpContext::HandlePlay(AMFObject &obj)
 void RtmpContext::ParseNameAndTcUrl()
 {
     auto pos = app_.find_first_of("/");
-    if(pos != std::string::npos)
+    if(pos!=std::string::npos)
     {
-        app_ = app_.substr(pos + 1);
+        app_ = app_.substr(pos+1);
     }
 
     param_.clear();
-    pos = name_.find_first_of("?"); // 有问号。后面就是带参数的
+    pos = name_.find_first_of("?");
     if(pos != std::string::npos)
     {
-        param_ = name_.substr(pos + 1);
+        param_ = name_.substr(pos+1);
+        name_ = name_.substr(0,pos);
     }
-    
+
     std::string domain;
-    std::vector<std::string> list = base::StringUtils::SplitString(tc_url_, "/");
-    // 写文档的时候要有格式要求
-    if(list.size() == 6) // rtmp://ip/domain:port/app/stream
+
+    std::vector<std::string> list = base::StringUtils::SplitString(tc_url_,"/");
+    if(list.size()==5)//rmtp://ip/domain:port/app
     {
         domain = list[3];
         app_ = list[4];
-        name_ = list[5];
     }
-    else if(list.size() == 5) // rtmp://domain:port/app/stream
+    else if(list.size() == 4) //rmtp://domain:port/app
     {
         domain = list[2];
         app_ = list[3];
-        name_ = list[4];
     }
 
-    // 没有ip的情况，去掉domain的port
-    auto p = domain.find_first_not_of(":");
-    if(p != domain.npos)
+    auto p = domain.find_first_of(":");
+    if(p!=std::string::npos)
     {
-        domain = domain.substr(0, p);
+        domain = domain.substr(0,p);
     }
 
-
-    // 没有ip的情况
-    // if(domain.empty() && tc_url_.size() > 7) // rtmp:// 7个字符
-    // {
-    //     auto pos = tc_url_.find_first_of(":/", 7);  // 第一个冒号或斜杠
-    //     if(pos != std::string::npos)
-    //     {
-    //         domain = tc_url_.substr(7, pos);
-    //     }
-    // }
-    
-    std::stringstream ss;
     session_name_.clear();
+    session_name_ += domain;
+    session_name_ += "/";
+    session_name_ += app_;
+    session_name_ += "/";
+    session_name_ += name_;
 
-    ss << domain << "/" << app_ << "/" << name_;
-    session_name_ = ss.str();
-
-    RTMP_TRACE << "session_name:" << session_name_
-                << " param :" << param_
-                << " host:" << connection_->PeerAddr().ToIpPort();
+    RTMP_TRACE << "session_name:" << session_name_ 
+            << " param:" << param_ 
+            << " host:" << connection_->PeerAddr().ToIpPort();
 }
-
 /// @brief  客户端发送命令，发布一个有名字的流到服务器，其他客户端可以用名字进行拉流
 void RtmpContext::SendPublish()
 {
@@ -1157,6 +1143,7 @@ void RtmpContext::HandlePublish(AMFObject &obj)
 {
     auto tran_id = obj.Property(1)->Number();
     name_ = obj.Property(3)->String();
+    ParseNameAndTcUrl(); // fixbug:这里没有解析Name，导致后面的session_name拿不到
 
     RTMP_TRACE << "recv publish session_name:" << session_name_
                 << " param :" << param_

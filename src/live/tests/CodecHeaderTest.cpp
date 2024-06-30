@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-28 00:08:44
+ * @LastEditTime: 2024-06-28 17:13:38
  * @FilePath: /liveServer/src/live/tests/CodecHeaderTest.cpp
  * @Description:  learn 
  */
@@ -34,7 +34,7 @@ class RtmpHandlerImpl : public RtmpHandler
         // 推流
         bool OnPublish(const TcpConnectionPtr& conn, const std::string &session_name, const std::string &param){return false;}
         // 暂停
-        void OnPause(const TcpConnectionPtr& conn, bool pause){}
+        bool OnPause(const TcpConnectionPtr& conn, bool pause){return false;}
         // 定位(快进等)≈
         void OnSeek(const TcpConnectionPtr& conn, double time){}
 

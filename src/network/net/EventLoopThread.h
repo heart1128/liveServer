@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 16:41:08
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-03 21:22:18
- * @FilePath: /tmms/src/network/net/EventLoopThread.h
+ * @LastEditTime: 2024-06-29 22:33:44
+ * @FilePath: /liveServer/src/network/net/EventLoopThread.h
  * @Description:  learn 
  */
 #pragma once
@@ -36,12 +36,13 @@ namespace tmms
             void startEventLoop();
 
             EventLoop* loop_{nullptr};
-            std::thread thread_;
             bool running_{false};
             std::mutex lock_;
             std::condition_variable condition_;
             std::once_flag once_;   // 只运行一次
             std::promise<int> promise_loop_;
+
+            std::thread thread_; // 初始化放在最后，因为前面的参数都是要在线程启动前设置的
         };
 
            

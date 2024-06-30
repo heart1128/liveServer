@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 16:12:24
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-24 21:15:08
- * @FilePath: /tmms/src/main/main.cpp
+ * @LastEditTime: 2024-06-29 22:27:29
+ * @FilePath: /liveServer/src/main/main.cpp
  * @Description:  learn 
  */
 #include <iostream>
@@ -11,11 +11,14 @@
 #include <chrono>
 #include "base/FileMgr.h"
 #include "base/TaskMgr.h"
+#include "live/LiveService.h"
 #include "base/TTime.h"
 #include "base/Config.h"
 #include "base/LogStream.h"
 
 using namespace tmms::base;
+using namespace tmms::live;
+using namespace tmms::mm;
 
 std::thread t;
 // 测试配置文件加载日志切分
@@ -66,7 +69,10 @@ int main(int argc, char* argv[])
     }, 1000);
     sTaskMgr->Add(task);
     
-    Test_config_and_rotate();
+    // Test_config_and_rotate();
+
+    // 直播测试
+    sLiveService->Start();
 
     // 启动定时任务
     while(1)

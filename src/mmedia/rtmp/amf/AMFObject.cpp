@@ -3,8 +3,8 @@
  * @Version: 0.1
  * @Autor: 
  * @Date: 2024-06-16 15:46:07
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-16 17:57:38
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-29 23:14:31
  */
 #include "AMFObject.h"
 #include "mmedia/base/MMediaLog.h"
@@ -13,6 +13,7 @@
 #include "AMFString.h"
 #include "AMFBoolean.h"
 #include "AMFDate.h"
+#include "AMFNull.h"
 #include "AMFLongString.h"
 
 using namespace tmms::mm;
@@ -125,8 +126,10 @@ int AMFObject::Decode(const char *data, int size, bool has)
                 break;
             }
             case kAMFNull:
-            {
+            {   
+                // fixbug：之前这里都没有把NULL写入Object的属性，所以按索引取属性的时候少了一个，取错了
                 RTMP_TRACE << "Null.";
+                properties_.emplace_back(std::move(std::make_shared<AMFNull>()));
                 break;
             }
             case kAMFEcmaArray: // 对象数组

@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-23 18:16:49
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-23 18:29:07
- * @FilePath: /tmms/src/base/AppInfo.cpp
+ * @LastEditTime: 2024-06-30 10:27:51
+ * @FilePath: /liveServer/src/base/AppInfo.cpp
  * @Description:  learn 
  */
 #include "AppInfo.h"
@@ -55,7 +55,7 @@ bool AppInfo::ParseAppInfo(Json::Value &root)
     Json::Value clObj = root["content_latency"];
     if(!clObj.isNull())
     {
-        content_latency = clObj.asUInt();
+        content_latency = clObj.asUInt() * 1000; // ms
     }
 
     Json::Value sitObj = root["stream_idle_time"];

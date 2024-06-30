@@ -1,0 +1,26 @@
+{
+    "name" : "tmms server",
+    "cpu_start" : 0,
+    "threads" : 4,
+    "cpus" : 4,
+    "log" :
+    {
+        "level" : "TRACE",
+        "name" : "tmms.log",
+        "path" : "../logs/",
+        "rotate" : "HOUR"
+    },
+    "services" :
+    [
+        {
+            "addr" : "heart.com",
+            "port" : 1935,
+            "portocol" : "rtmp",
+            "transport" : "tcp"
+        }
+    ],
+    "directory":
+    [   
+        "../config/publish/heart.com.json"
+    ]
+}

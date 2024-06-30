@@ -1,0 +1,18 @@
+{
+    "domain":
+    {
+        "name" : "heart.com",
+        "type" : "publish",
+        "app" :
+        [
+            {
+                "name" : "live",
+                "max_buffer" : 1000,
+                "hls_support" : "on",
+                "flv_support" : "on",
+                "rtmp_support" : "on",
+                "content_latency" : 3
+            }
+        ]
+    }
+}

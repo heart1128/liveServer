@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 10:34:50
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-24 20:51:20
- * @FilePath: /tmms/src/base/Config.h
+ * @LastEditTime: 2024-06-29 18:06:11
+ * @FilePath: /liveServer/src/base/Config.h
  * @Description:  learn 
  */
 #pragma once
@@ -49,6 +49,9 @@ namespace tmms
         class AppInfo;
         using DomainInfoPtr = std::shared_ptr<DomainInfo>;
         using AppInfoPtr = std::shared_ptr<AppInfo>;
+
+        class Config;
+        using ConfigPtr = std::shared_ptr<Config>; 
         // 基本配置类
         class Config
         {
@@ -72,6 +75,7 @@ namespace tmms
             std::string name_;
             int32_t cpu_start_{0};      // 开始绑定的cpu，用第一个
             int32_t thread_num_{-1};
+            int32_t cpus_{-1};
         
         private:
             bool ParseLogInfo(const Json::Value &root);

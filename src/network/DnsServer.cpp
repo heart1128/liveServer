@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-08 21:09:09
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 08:49:47
- * @FilePath: /tmms/src/network/net/DnsServer.cpp
+ * @LastEditTime: 2024-06-29 23:40:08
+ * @FilePath: /liveServer/src/network/DnsServer.cpp
  * @Description:  learn 
  */
 #include "DnsServer.h"
@@ -79,6 +79,7 @@ void DnsServer::UpdateHost(const std::string &host, std::vector<InetAddress::ptr
 {
     std::lock_guard<std::mutex> lk(lock_);
     hosts_info_[host].swap(list);
+    hosts_info_[host] = list;
 }
 
 /// @brief 返回整个域名表

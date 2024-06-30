@@ -2,7 +2,7 @@ aux_source_directory(. SRCS) # 这行代码的作用是查找当前目录（.）
 add_executable(tmms ${SRCS}) # 这行代码创建一个名为 tmms 的可执行文件，并将 SRCS 中的源文件添加到这个目标中。
 
 add_dependencies(base jsoncpp)  # 添加依赖
-target_link_libraries(tmms base jsoncpp.a)
+target_link_libraries(tmms base network mmedia live jsoncpp.a crypto)
 
 # 这是生成的 make install命令
 # TARGETS tmms 要install的文件

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 20:19:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-25 21:24:38
+ * @LastEditTime: 2024-06-30 10:20:10
  * @FilePath: /liveServer/src/mmedia/rtmp/RtmpHandShake.cpp
  * @Description:  learn 
  * 
@@ -286,11 +286,12 @@ void RtmpHandShake::CreateC2S2(const char *data, int bytes, int offset)
         if(is_client_)
         {
             // 计算C1S1的digest_，客户端就计算自己的，填充C2
-            CalculateDigest(digest_, 32, 0, rtmp_player_key, sizeof(rtmp_player_key), digest);
+            // fixbug: 这里的digest_是自己的，应该是用对方发送的digest_
+            CalculateDigest((const uint8_t*)(data + offset), 32, 0, rtmp_player_key, sizeof(rtmp_player_key), digest);
         }
         else
         {
-            CalculateDigest(digest_, 32, 0, rtmp_server_key, sizeof(rtmp_server_key), digest);
+            CalculateDigest((const uint8_t*)(data + offset), 32, 0, rtmp_server_key, sizeof(rtmp_server_key), digest);
         }
         // 计算真正的digest 32 bytes
         CalculateDigest(C2S2_, kRtmpHandShakePacketSize - 32, 0, digest, 32, &C2S2_[kRtmpHandShakePacketSize - 32]);

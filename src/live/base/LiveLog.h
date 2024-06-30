@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 21:34:54
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-25 21:44:47
+ * @LastEditTime: 2024-06-29 22:26:14
  * @FilePath: /liveServer/src/live/base/LiveLog.h
  * @Description:  learn
  */
@@ -16,7 +16,7 @@ using namespace tmms::base;
 
 // 这些可以不开,debug才开
 #ifdef LIVE_DEBUG_ON
-#define LIVE_TRACE std::cout << "\nLIVE::"
+#define LIVE_TRACE LOG_TRACE << "LIVE::"
 #define LIVE_DEBUG LOG_DEBUG << "LIVE::"
 #define LIVE_INFO LOG_INFO << "LIVE::"
 #elif

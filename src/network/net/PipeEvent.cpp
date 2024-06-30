@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-25 20:25:32
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-29 21:23:09
+ * @FilePath: /liveServer/src/network/net/PipeEvent.cpp
+ * @Description:  learn 
+ */
 #include "PipeEvent.h"
 #include "network/base/Network.h"
 
@@ -41,7 +49,7 @@ void PipeEvent::OnRead()
         NETWORK_ERROR << "pipe read error.error: " << errno;
     }
 
-    std::cout << "pipe read tmp : " << tmp << std::endl;
+    // std::cout << "pipe read tmp : " << tmp << std::endl;
 }
 
 void PipeEvent::OnClose()

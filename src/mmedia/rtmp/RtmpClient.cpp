@@ -82,7 +82,7 @@ bool RtmpClient::ParseUrl(const std::string &url)
                 }
             }
             addr_.SetAddr(domain);
-            RTMP_TRACE << "domain:" << domain << std::endl;
+            RTMP_TRACE << "domain:" << domain;
             addr_.SetPort(port);
             return true;
         }

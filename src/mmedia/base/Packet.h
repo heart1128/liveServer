@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 16:30:36
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-22 20:00:09
- * @FilePath: /tmms/src/mmedia_bak/base/Packet.h
+ * @LastEditTime: 2024-06-28 23:22:37
+ * @FilePath: /liveServer/src/mmedia/base/Packet.h
  * @Description:  learn 
  */
 #pragma once
@@ -31,7 +31,7 @@ namespace tmms
 
         /**
          * 
-         * packet 保存音视频的packet，分配内存等
+         * packet 保存音视频的packet，分配内存等，是body部分，不是header
          * 
         */
         class Packet;

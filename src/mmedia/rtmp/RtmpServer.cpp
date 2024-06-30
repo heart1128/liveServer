@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-10 14:43:04
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-22 19:58:20
+ * @LastEditTime: 2024-06-29 22:41:35
  */
 #include "RtmpServer.h"
 #include "mmedia/base/MMediaLog.h"
@@ -30,6 +30,7 @@ void RtmpServer::Start()
     TcpServer::SetWriteCompleteCallback(std::bind(&RtmpServer::OnWriteComplete,this, std::placeholders::_1));
     TcpServer::SetMessageCallback(std::bind(&RtmpServer::OnMessage,this, std::placeholders::_1, std::placeholders::_2));
     TcpServer::Start();
+    RTMP_DEBUG << "RTMP server start.";
 }
 
 void RtmpServer::Stop()
@@ -47,7 +48,7 @@ void RtmpServer::OnNewConnection(const TcpConnectionPtr &conn)
         rtmp_handler_->OnNewConnection(conn);
     }
     // 2. 处理rtmp服务端连接
-    RtmpContextPtr shake = std::make_shared<RtmpContext>(conn, nullptr);
+    RtmpContextPtr shake = std::make_shared<RtmpContext>(conn, rtmp_handler_);
     conn->SetContext(kRtmpContext, shake);
     shake->StartHandShake(); // 等待C0C1
 }

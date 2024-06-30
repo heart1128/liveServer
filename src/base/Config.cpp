@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 10:36:44
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-24 21:26:52
- * @FilePath: /tmms/src/base/Config.cpp
+ * @LastEditTime: 2024-06-29 22:04:47
+ * @FilePath: /liveServer/src/base/Config.cpp
  * @Description:  learn 
  */
 #include "Config.h"
@@ -47,6 +47,11 @@ bool Config::LoadConfig(const std::string & file)
     if(!cpusObj.isNull())
     {
         cpu_start_ = cpusObj.asInt();
+    }
+    Json::Value cpus1Obj = root["cpus"];
+    if(!cpus1Obj.isNull())
+    {
+        cpus_ = cpus1Obj.asInt();
     }
     Json::Value threadsObj = root["threads"];
     if(!threadsObj.isNull())

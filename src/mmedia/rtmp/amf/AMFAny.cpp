@@ -3,8 +3,8 @@
  * @Version: 0.1
  * @Autor: 
  * @Date: 2024-06-16 15:18:01
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2024-06-18 22:30:10
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-06-29 23:11:39
  */
 #include "AMFAny.h"
 #include "mmedia/base/MMediaLog.h"
@@ -105,6 +105,11 @@ bool AMFAny::IsDate()
 }
 
 bool AMFAny::IsObject()
+{
+    return false;
+}
+
+bool AMFAny::IsNull()
 {
     return false;
 }
