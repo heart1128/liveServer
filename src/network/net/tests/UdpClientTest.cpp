@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 14:43:22
- * @FilePath: /tmms/src/network/net/tests/UdpClientTest.cpp
+ * @LastEditTime: 2024-06-30 17:45:48
+ * @FilePath: /liveServer/src/network/net/tests/UdpClientTest.cpp
  * @Description:  learn 
  */
 #include "network/net/Acceptor.h"
@@ -28,7 +28,7 @@ int main()
 
     if(loop)
     {
-        InetAddress server("10.101.128.69:34444");
+        InetAddress server("127.0.0.1:34444");
         // 继承了std::enable_shared_from_this<Event>必须使用智能指针
         std::shared_ptr<UdpClient> client = std::make_shared<UdpClient>(loop, server);
         

@@ -305,7 +305,7 @@ bool Config::ParseServiceInfo(const Json::Value &serviceObj)
 
         sinfo->addr = s.get("addr", "0.0.0.0").asString();
         sinfo->port = s.get("port", "0").asUInt();
-        sinfo->protocol = s.get("protocol", "rtmp").asString();
+        sinfo->protocol = s.get("portocol", "rtmp").asString();
         sinfo->transport = s.get("transport", "tcp").asString();
 
         LOG_INFO << "\nservice info addr:" << sinfo->addr

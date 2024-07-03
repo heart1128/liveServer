@@ -17,6 +17,12 @@
             "port" : 1935,
             "portocol" : "rtmp",
             "transport" : "tcp"
+        },
+        {
+            "addr" : "heart.com",
+            "port" : 8080,
+            "portocol" : "http",
+            "transport" : "tcp"
         }
     ],
     "directory":

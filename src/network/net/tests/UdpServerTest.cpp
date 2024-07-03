@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-05 16:42:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 15:03:15
- * @FilePath: /tmms/src/network/net/tests/UdpServerTest.cpp
+ * @LastEditTime: 2024-06-30 17:41:25
+ * @FilePath: /liveServer/src/network/net/tests/UdpServerTest.cpp
  * @Description:  learn 
  */
 #include "network/net/Acceptor.h"
@@ -13,6 +13,7 @@
 #include "network/UdpServer.h"
 
 #include <iostream>
+#include <cstring>
 #include <thread>
 #include <chrono>
 
@@ -28,14 +29,16 @@ int main()
 
     if(loop)
     {
-        InetAddress listen("10.101.128.69:34444");
+        InetAddress listen("127.0.0.1:34444");
         // 继承了std::enable_shared_from_this<Event>必须使用智能指针
         std::shared_ptr<UdpServer> server = std::make_shared<UdpServer>(loop, listen);
         
         // 测试OnRead，收到什么发回什么,echo服务器
         server->SetRecvMsgCallback([&server](const InetAddress &addr, MsgBuffer &buf){
             std::cout << "host : " << addr.ToIpPort() << " \nmsg : "<< buf.Peek() << std::endl;
-
+            char buffer[1024];
+            std::cout << "input: ";
+            std::cin >> buffer;
             struct sockaddr_in6 saddr;
             socklen_t len = sizeof(saddr);
             addr.GetSockAddr((struct sockaddr*)&saddr);

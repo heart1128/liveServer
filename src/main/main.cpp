@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-01 16:12:24
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-29 22:27:29
+ * @LastEditTime: 2024-07-03 15:53:35
  * @FilePath: /liveServer/src/main/main.cpp
  * @Description:  learn 
  */
@@ -38,7 +38,7 @@ void Test_config_and_rotate()
 int main(int argc, char* argv[])
 {
     g_logger = new Logger(nullptr);
-    g_logger->SetLogLevel(KTrace);
+    g_logger->SetLogLevel(KDebug);
 
     if(!sConfigMgr->LoadConfig("../config/config.json"))
     {

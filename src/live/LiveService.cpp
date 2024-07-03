@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:34:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-30 00:19:11
+ * @LastEditTime: 2024-07-03 17:33:43
  * @FilePath: /liveServer/src/live/LiveService.cpp
  * @Description:  learn 
  */
@@ -13,6 +13,10 @@
 #include "Session.h"
 #include "base/TTime.h"
 #include "mmedia/rtmp/RtmpServer.h"
+#include "mmedia/http/HttpServer.h"
+#include "mmedia/http/HttpRequest.h"
+#include "mmedia/http/HttpUtils.h"
+#include "mmedia/http/HttpContext.h"
 
 using namespace tmms::live;
 using namespace tmms::mm;
@@ -47,7 +51,7 @@ SessionPtr LiveService::CreateSession(const std::string &session_name)
     if(!app_info) // 没找到配置
     {
         LIVE_ERROR << "create session failed. can't found config. domain:" << list[0]
-                    << ", app : "<< list[1];
+                    << ",app:"<< list[1];
         return session_null;
     }
 
@@ -256,6 +260,94 @@ void LiveService::OnRecv(const TcpConnectionPtr &conn, PacketPtr &&data)
     user->GetStream()->AddPacket(std::move(data));
 }
 
+/// @brief 回调用过httpContext进行调用
+/// @param conn 
+void LiveService::OnSent(const TcpConnectionPtr &conn)
+{
+}
+
+bool LiveService::OnSentNextChunk(const TcpConnectionPtr &conn)
+{
+    
+    return false;
+}
+
+/// @brief 收到一个请求
+/// @param conn 
+/// @param req 
+/// @param packet 
+void LiveService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &req, const PacketPtr &packet)
+{
+    if(req->IsRequest())
+    {
+        LIVE_DEBUG << "req method:" << req->Method() << " path:" << req->Path();
+    }
+    else
+    {
+        LIVE_DEBUG << "req code:" << req->GetStatusCode() << " msg:" << HttpUtils::ParseStatusMessage(req->GetStatusCode());
+    }
+
+    auto headers = req->Headers();
+    for(auto const &h : headers)
+    {
+        LIVE_DEBUG << h.first << ":" << h.second;
+    }
+
+    // 收到请求
+    if(req->IsRequest())
+    {
+        // 响应flv，传输
+        int fd = ::open("output.flv", O_RDONLY,0644); // r 4 w 2 x 1
+        if(fd < 0)
+        {
+            LIVE_ERROR << "open failed.file: output.flv .error:" << strerror(errno);
+            conn->ForceClose();
+            return;
+        }
+
+         // 创建一个响应，进行发送
+        HttpRequestPtr res = std::make_shared<HttpRequest>(false);
+        res->SetStatusCode(200);
+        res->AddHeader("server", "tmms");
+        res->AddHeader("content-type", "video/x-flv");  // 测试flv格式
+        // res->AddHeader("content-length", std::to_string(strlen("test http server")));
+        // res->SetBody("test http server");
+
+        // conn做到了串通，保存各种业务的上下文
+        auto ctx = conn->GetContext<HttpContext>(kHttpContext);
+        if(ctx)
+        {
+            res->SetIsStream(true);
+            ctx->PostRequest(res);
+        }
+
+        while(true)
+        {
+            PacketPtr ndata = Packet::NewPacket(65535);
+            auto ret = ::read(fd, ndata->Data(), 65535);
+            if(ret <= 0)
+            {
+                break;
+            }
+            
+            ndata->SetPacketSize(ret);
+
+            while(true)
+            {
+                // 一直等待这个包发送成功才能发送下一个包
+                auto sent = ctx->PostStreamChunk(ndata);
+                if(sent)
+                {
+                    break;
+                }
+            }
+            
+        }
+        ::close(fd);
+        conn->ForceClose();
+    }
+}
+
 void LiveService::Start()
 {
     // 1. 启动循环线程池
@@ -271,11 +363,21 @@ void LiveService::Start()
     {
         for(auto &s : services)
         {
+            LIVE_DEBUG << "s->protocpl:" << s->protocol << "  s->port:" << s->port;
             if(s->protocol == "RTMP" || s->protocol == "rtmp")
             {
                 InetAddress local(s->addr, s->port);
                 // rtmpserver继承tcpserver，this传入作为业务上层，有数据都会通知下面的回调
                 TcpServer* server = new RtmpServer(el, local, this);
+                servers_.push_back(server);
+                // 启动tcpServer，设置accept
+                servers_.back()->Start();
+            }
+            else if(s->protocol == "HTTP" || s->protocol == "http")
+            {
+                InetAddress local(s->addr, s->port);
+                // rtmpserver继承tcpserver，this传入作为业务上层，有数据都会通知下面的回调
+                TcpServer* server = new HttpServer(el, local, this);
                 servers_.push_back(server);
                 // 启动tcpServer，设置accept
                 servers_.back()->Start();

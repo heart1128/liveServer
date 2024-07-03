@@ -7,4 +7,4 @@ add_library(network ${DIR_LIB_SRCS})
 
 target_link_libraries(network base) # 用到了log，依赖base库
 
-# add_subdirectory(net/tests)
+add_subdirectory(net/tests)
