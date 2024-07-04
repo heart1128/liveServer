@@ -203,6 +203,16 @@ void Stream::GetFrames(const PlayerUserPtr &user)
     GetNextFrame(user);
 }
 
+bool Stream::HasVideo() const
+{
+    return has_video_;
+}
+
+bool Stream::HasAudio() const
+{
+    return has_audio_;
+}
+
 /// @brief 定位gop，查找meta,audioheader,videoheader是否在推流中接收到了
 /// @param user 保存信息
 /// @return 全部收到了返回true表示可以继续接受数据

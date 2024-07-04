@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-02 13:37:15
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-03 16:59:10
+ * @LastEditTime: 2024-07-04 15:16:14
  * @FilePath: /liveServer/src/mmedia/http/HttpRequest.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -261,6 +261,26 @@ void HttpRequest::SetIsStream(bool s)
 void HttpRequest::SetIsChunked(bool c)
 {
     is_chunk_ = c;
+}
+
+/// @brief 非法请求
+/// @return 响应码
+HttpRequestPtr HttpRequest::NewHttp400Response()
+{
+    auto res = std::make_shared<HttpRequest>(false);  // 响应
+    res->SetStatusCode(400);
+    res->AddHeader("User=Agent", "tmms");
+    return res;
+}
+
+/// @brief 404 not found
+/// @return 
+HttpRequestPtr HttpRequest::NewHttp404Response()
+{
+    auto res = std::make_shared<HttpRequest>(false);  // 响应
+    res->SetStatusCode(404);
+    res->AddHeader("User=Agent", "tmms");
+    return res;
 }
 
 /// @brief 组装请求行 method url version \r\n

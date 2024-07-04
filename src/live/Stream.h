@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-28 22:25:40
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-30 00:04:00
+ * @LastEditTime: 2024-07-04 15:04:17
  * @FilePath: /liveServer/src/live/Stream.h
  * @Description:  learn 
  */
@@ -50,6 +50,9 @@ namespace tmms
             void AddPacket(PacketPtr&& packet);
         /// 输出成员函数
             void GetFrames(const PlayerUserPtr &user);
+
+            bool HasVideo() const;
+            bool HasAudio() const;
 
         private:
             void SetReady(bool ready);

@@ -4,11 +4,12 @@
  * @Autor: 
  * @Date: 2024-06-10 14:43:04
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-02 17:40:05
+ * @LastEditTime: 2024-07-04 16:05:25
  */
 #include "HttpServer.h"
 #include "mmedia/base/MMediaLog.h"
 #include "mmedia/http/HttpContext.h"
+#include "mmedia/flv/FlvContext.h"
 
 using namespace tmms::mm;
 
@@ -87,6 +88,13 @@ void HttpServer::OnWriteComplete(const ConnectionPtr &conn)
     if(shake)
     {
         shake->WriteComplete(std::dynamic_pointer_cast<TcpConnection>(conn)); // 运转状态机
+    }
+    // 设置的dlvconetext是在处理请求设置的，肯定比服务端发送完成的时间要早
+    // 因为是tcpconnetion传入的回调，贯穿传输到业务，在liveServer设置的flvConetext也能拿到
+    FlvContextPtr flv = conn->GetContext<FlvContext>(kFlvContext); 
+    if(flv)
+    {
+        flv->WriterComplete(std::dynamic_pointer_cast<TcpConnection>(conn));
     }
 }
 

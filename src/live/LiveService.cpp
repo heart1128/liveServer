@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:34:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-04 11:15:38
+ * @LastEditTime: 2024-07-04 15:52:58
  * @FilePath: /liveServer/src/live/LiveService.cpp
  * @Description:  learn 
  */
@@ -18,6 +18,7 @@
 #include "mmedia/http/HttpUtils.h"
 #include "mmedia/http/HttpContext.h"
 #include "network/DnsServer.h"
+#include "mmedia/flv/FlvContext.h"
 
 using namespace tmms::live;
 using namespace tmms::mm;
@@ -27,6 +28,9 @@ namespace
     static SessionPtr session_null;
 }
 
+/// @brief 先创建过的流，如果没找到就看配置文件有没有配置，最后全是配置文件里的流
+/// @param session_name 
+/// @return 
 SessionPtr LiveService::CreateSession(const std::string &session_name)
 {
     std::lock_guard<std::mutex> lk(lock_);
@@ -152,6 +156,8 @@ void LiveService::OnConnectionDestroy(const TcpConnectionPtr &conn)
     }
 }
 
+/// @brief 在收到播放请求之后，添加用户进行tcpConnection的Actie，然后不断激活到顶层，也就是这里，然后进行数据的发送
+/// @param conn 
 void LiveService::OnActive(const ConnectionPtr &conn)
 {
     auto user = conn->GetContext<PlayerUser>(kUserContext);
@@ -273,7 +279,7 @@ bool LiveService::OnSentNextChunk(const TcpConnectionPtr &conn)
     return false;
 }
 
-/// @brief 收到一个请求
+/// @brief 收到一个http请求,可以发送flv，这是httpcontext的上层业务回调函数
 /// @param conn 
 /// @param req 
 /// @param packet 
@@ -297,55 +303,78 @@ void LiveService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &
     // 收到请求
     if(req->IsRequest())
     {
-        // 响应flv，传输
-        int fd = ::open("output.flv", O_RDONLY,0644); // r 4 w 2 x 1
-        if(fd < 0)
-        {
-            LIVE_ERROR << "open failed.file: output.flv .error:" << strerror(errno);
-            conn->ForceClose();
-            return;
-        }
+        // http://ip:port/domain/app/stream.flv
+        // http://ip:potr/domain/app/stream/filename.flv
 
-         // 创建一个响应，进行发送
-        HttpRequestPtr res = std::make_shared<HttpRequest>(false);
-        res->SetStatusCode(200);
-        res->AddHeader("server", "tmms");
-        res->AddHeader("content-type", "video/x-flv");  // 测试flv格式
-        // res->AddHeader("content-length", std::to_string(strlen("test http server")));
-        // res->SetBody("test http server");
-
-        // conn做到了串通，保存各种业务的上下文
-        auto ctx = conn->GetContext<HttpContext>(kHttpContext);
-        if(ctx)
+        auto list = base::StringUtils::SplitString(req->Path(), "/");
+        if(list.size() < 4) // 至少4个，不然请求非法
         {
-            res->SetIsStream(true);
-            ctx->PostRequest(res);
-        }
-
-        while(true)
-        {
-            PacketPtr ndata = Packet::NewPacket(65535);
-            auto ret = ::read(fd, ndata->Data(), 65535);
-            if(ret <= 0)
+            auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
+            if(http_cxt)
             {
-                break;
+                auto res = HttpRequest::NewHttp400Response();
+                http_cxt->PostRequest(res);
+                return;
             }
-            
-            ndata->SetPacketSize(ret);
+        }
 
-            while(true)
+        const std::string &domain = list[1];
+        const std::string &app = list[2];
+        string filename = list[3];
+        std::string stream_name;
+        if(list.size() > 4) // http://ip:potr/domain/app/stream/filename.flv
+        {
+            filename = list[4];
+            stream_name = list[3];
+        }
+        else
+        {
+            stream_name = base::StringUtils::FileName(filename); // 去.flv
+        }
+
+        std::string ext = base::StringUtils::Extension(filename); // 后缀
+        if(ext == "flv")
+        {
+            // 要传输flv了，创建一个session管理用户stream
+            std::string session_name = domain + "/" + app + "/" + stream_name;
+            LIVE_DEBUG << "flv play session name:" << session_name;
+            // 查找session_name。有没有这个推流存在，如果有就用flv封装用http发送播放
+            // 没有就创建一个新的（配置文件里面存在的）
+            auto s = CreateSession(session_name);
+            if(!s)
             {
-                // 一直等待这个包发送成功才能发送下一个包
-                auto sent = ctx->PostStreamChunk(ndata);
-                if(sent)
+                LIVE_ERROR << "can't create session name:" << session_name; 
+                auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
+                if(http_cxt)
                 {
-                    break;
+                    // 如果服务器出问题主动关闭连接，就会出现大量的time_wait状态
+                    // 返会404，客户端就会主动关闭
+                    auto res = HttpRequest::NewHttp404Response();
+                    http_cxt->PostRequest(res);
+                    return;
                 }
             }
-            
+
+            auto user = s->CreatePlayerUser(conn, session_name, "", UserType::kUserTypePlayerFlv);
+            if(!user)
+            {
+                LIVE_ERROR << "can't create user session name:" << session_name; 
+                auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
+                if(http_cxt)
+                {
+                    auto res = HttpRequest::NewHttp404Response();
+                    http_cxt->PostRequest(res);
+                    return;
+                }
+            }
+            conn->SetContext(kUserContext, user);
+            // 因为flv使用的是httpcontext处理发送，所以调用不到flvContext，这里创建一个
+            auto flv = std::make_shared<FlvContext>(conn, this);
+            // 设置到tcpConnection，和http用的同一个conn,httpserver也能拿到这个上下文
+            conn->SetContext(kFlvContext, flv);
+            // 用户加入到播放session的播放列表
+            s->AddPlayer(std::dynamic_pointer_cast<PlayerUser>(user));
         }
-        ::close(fd);
-        conn->ForceClose();
     }
 }
 

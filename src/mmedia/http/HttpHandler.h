@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-02 15:29:32
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-02 15:30:47
+ * @LastEditTime: 2024-07-04 16:10:57
  * @FilePath: /liveServer/src/mmedia/http/HttpHandler.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEba
  */
@@ -18,7 +18,7 @@ namespace tmms
         class HttpRequest;
         using HttpRequestPtr = std::shared_ptr<HttpRequest>;
         
-        class HttpHandler:public MMediaHandler
+        class HttpHandler: virtual public MMediaHandler
         {
         public:
             virtual void OnSent(const TcpConnectionPtr &conn) = 0;

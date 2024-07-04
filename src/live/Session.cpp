@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 15:09:16
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-30 10:21:14
+ * @LastEditTime: 2024-07-04 16:20:39
  * @FilePath: /liveServer/src/live/Session.cpp
  * @Description:  learn 
  */
@@ -13,6 +13,7 @@
 #include "live/base/LiveLog.h"
 #include "base/StringUtils.h"
 #include "RtmpPlayerUser.h"
+#include "FlvPlayerUser.h"
 
 using namespace tmms::live;
 
@@ -112,10 +113,19 @@ UserPtr Session::CreatePlayerUser(const ConnectionPtr &conn,
         return user_null;
     }
     
+    // TODO: 这里可以用抽象工厂创建
     PlayerUserPtr user;
     if(type == UserType::kUserTypePlayerRtmp)
     {
         user = std::make_shared<RtmpPlayerUser>(conn, stream_, shared_from_this());
+    }
+    else if(type == UserType::kUserTypePlayerFlv)
+    {
+        user = std::make_shared<FlvPlayerUser>(conn, stream_, shared_from_this());
+    }
+    else
+    {
+        return user_null;
     }
     user->SetAppInfo(app_info_);;
     user->SetDomainName(list[0]);

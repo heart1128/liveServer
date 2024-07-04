@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-02 13:33:14
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-03 11:33:14
+ * @LastEditTime: 2024-07-04 16:07:48
  * @FilePath: /liveServer/src/mmedia/http/HttpRequest.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -17,6 +17,8 @@ namespace tmms
 {
     namespace mm
     {
+        class HttpRequest;
+        using HttpRequestPtr = std::shared_ptr<HttpRequest>;
         class HttpRequest
         {
         public:
@@ -60,6 +62,8 @@ namespace tmms
             void SetIsStream(bool s);
             void SetIsChunked(bool c);
 
+            static HttpRequestPtr NewHttp400Response();
+            static HttpRequestPtr NewHttp404Response();
         
         private:
             void AppendRequestFirstLine(std::stringstream &ss);
@@ -78,6 +82,7 @@ namespace tmms
             bool is_stream_{false};  // 当前是流数据（没有读取到chunk header和没有body）
             bool is_chunk_{false};
         };
+
     } // namespace mm
     
 } // namespace tmms

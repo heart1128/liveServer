@@ -16,7 +16,7 @@ namespace tmms
     namespace mm
     {
         /// @brief  作为扩展功能的实现头
-        class RtmpHandler : public MMediaHandler
+        class RtmpHandler : virtual public MMediaHandler // 后面liveserver有菱形继承
         {
         public:
             // 播放
