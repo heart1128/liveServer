@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:34:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-03 17:33:43
+ * @LastEditTime: 2024-07-04 11:15:38
  * @FilePath: /liveServer/src/live/LiveService.cpp
  * @Description:  learn 
  */
@@ -17,6 +17,7 @@
 #include "mmedia/http/HttpRequest.h"
 #include "mmedia/http/HttpUtils.h"
 #include "mmedia/http/HttpContext.h"
+#include "network/DnsServer.h"
 
 using namespace tmms::live;
 using namespace tmms::mm;
@@ -355,6 +356,7 @@ void LiveService::Start()
     pool_ = new EventLoopThreadPool(config->thread_num_, config->cpu_start_, config->cpus_);
     pool_->Start();
 
+    sDnsService->Start(); //     启动dns服务,不断解析本地地址和域名
     // 2. 启动服务
     auto services = config->GetServiceInfos();
     auto eventloops = pool_->GetLoops(); // 启动loop并且获取

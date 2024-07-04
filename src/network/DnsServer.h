@@ -52,7 +52,7 @@ namespace tmms
             int32_t interval_{180 * 1000}; // ms，6mintue
         };
         
-        #define sDnsServer tmms::base::Singleton<tmms::network::DnsServer>::Instance()
+        #define sDnsService tmms::base::Singleton<tmms::network::DnsServer>::Instance()
     } // namespace network
     
 } // namespace tmms

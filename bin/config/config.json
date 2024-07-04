@@ -20,7 +20,7 @@
         },
         {
             "addr" : "heart.com",
-            "port" : 8080,
+            "port" : 80,
             "portocol" : "http",
             "transport" : "tcp"
         }

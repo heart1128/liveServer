@@ -123,7 +123,7 @@ namespace tmms
             int32_t out_chunk_size_{4096};              // 最大包的大小
             std::list<PacketPtr> out_waiting_queue_;    // 等待build的处理，是存放网络接收的packet
             std::list<BufferNodePtr> sending_bufs_;     // buildChunk的数据写在这里保存等待发送,tcp发送的就是这个
-            std::list<PacketPtr> out_sending_packets_;  // 发送的包
+            std::list<PacketPtr> out_sending_packets_;  // 发送的包， 正在发送的包，延长生命周期
             bool sending_{false};                       // 是否在发送
             /////////  控制消息
             int32_t ack_size_{2500000};     // 确认窗口

@@ -1,6 +1,7 @@
 #include "HttpParser.h"
 #include "base/StringUtils.h"
 #include "mmedia/base/MMediaLog.h"
+#include "HttpUtils.h"
 #include <algorithm>
 
 using namespace tmms::mm;
@@ -23,7 +24,15 @@ HttpParserState HttpParser::Parse(MsgBuffer &buf)
     {
         return state_;
     }
-
+    // 完成之后清除
+    if(state_ == kExpectHttpComplete)
+    {
+        ClearForNextHttp();
+    }
+    else if(state_ == kExpectChunkComplete)
+    {
+        ClearForNextChunk();
+    }
     switch (state_)
     {
     case kExpectHeaders:
@@ -108,6 +117,7 @@ HttpParserState HttpParser::Parse(MsgBuffer &buf)
             }
             else
             {
+                current_chunk_length_ += 2; // \r\n\0\r\n\r\n 前面的\r\n去掉
                 state_ = kExpectChunkBody;
             }
         }
@@ -254,6 +264,7 @@ void HttpParser::ParseChunk(MsgBuffer &buf)
     current_content_length_ -= size;
     if(current_chunk_length_ == 0 || chunk_->Space() == 0)    // 解析完成，没解析完成还是这个状态，再进入函数
     {
+        chunk_->SetPacketSize(chunk_->PacketSize() - 2);
         state_ = kExpectChunkComplete;
     }
 }
@@ -279,7 +290,8 @@ void HttpParser::ParseHeaders()
         {
             std::string k = l.substr(0, pos);
             std::string v = l.substr(pos + 1);
-
+            k = HttpUtils::Trim(k);
+            v = HttpUtils::Trim(v);
             HTTP_DEBUG << "parse header k:" << k << " v:" << v;
             req_->AddHeader(std::move(k), std::move(v));
         }
@@ -345,12 +357,6 @@ void HttpParser::ProcessMethodLine(const std::string &line)
     // method 空格 url 空格 http版本 \r\n   请求
     // httpversion  空格 code 空格 code desc \r\n 响应
     auto list = StringUtils::SplitString(line, " ");
-    if(list.size() != 3)
-    {
-        reason_ = k400BadRequest;
-        state_ = kExpectError;
-        return;
-    }
     std::string str = list[0]; // method
     // 转小写
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);

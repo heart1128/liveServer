@@ -101,11 +101,13 @@ std::string HttpRequest::MakeHeaders()
 void HttpRequest::SetQuery(const std::string &query)
 {
     query_ = query;
+    ParseParameters();// 需要解析一下，可能参数还是没有编码的
 }
 
 void HttpRequest::SetQuery(std::string &&query)
 {
     query_ = std::move(query);
+    ParseParameters();
 }
 
 /// @brief param是自定义的查询字符串，不能转换大小写
