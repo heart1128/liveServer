@@ -7,6 +7,7 @@
  * @Description:  learn 
 -->
 # 直播服务器
+整个流程就是，启动liveserver，创建rtmpserver/httpserver监听，客户端连接之后有消息就回调上层，tcpconnection->sever->liveserver处理数据，进行解析，如果是rtmp就进行解析rtmp，如果是http就处理flv
 
 ## 1. base库
 ## 2. 网络服务器
@@ -33,3 +34,6 @@ flv不是一种协议，是一种数据封装格式，rtmp推流上服务器的�
 ### 10.2 flvPlayUser
 实现控制发送头部请求等，通过flv播放。创建Player加入到session中，利用liveServer控制，机械能判断flv的使用和创建，flv实际使用的context是httpContext进行发送，在响应的时候也会使用flcContext进行组包,具体在HttpServer中。  
 在通过tcpConnection->HttpContext->OnRequest回调到liveServer中，首先判断请求是flv还是rtmp，创建对应的playerUser，然后调用tcpConntcion的Avtive()，不断上层回调最终到liveServer的OnActive()中开始flv数据(数据从stream不断保存推流的数据拿)发送（之前注册的用户拿出来，rtmp用户用trmpPlayer，flv用FlvPlayer），首先FlvPlayerUser发送元数据，头信息，,遇到数据循环发送，然后利用flvContext使用tcp发送数据。
+
+## 11. Demux实现
+- flv格式 ： https://www.cnblogs.com/leisure_chn/p/10662941.html

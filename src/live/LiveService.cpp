@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:34:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-04 15:52:58
+ * @LastEditTime: 2024-07-06 11:43:19
  * @FilePath: /liveServer/src/live/LiveService.cpp
  * @Description:  learn 
  */
@@ -327,7 +327,7 @@ void LiveService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &
             filename = list[4];
             stream_name = list[3];
         }
-        else
+        else  // http://ip:port/domain/app/filename.flv
         {
             stream_name = base::StringUtils::FileName(filename); // 去.flv
         }

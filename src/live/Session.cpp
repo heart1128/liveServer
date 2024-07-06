@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 15:09:16
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-04 16:20:39
+ * @LastEditTime: 2024-07-06 11:59:53
  * @FilePath: /liveServer/src/live/Session.cpp
  * @Description:  learn 
  */
@@ -48,6 +48,7 @@ bool Session::IsTimeout()
     // 流超时
     if(stream_->Timeout())
     {
+        LIVE_DEBUG << "stream timeout.";
         return true;
     }
 
@@ -56,6 +57,7 @@ bool Session::IsTimeout()
     // 没有用户的时间达到配置的时间，超时
     if(players_.empty() && idle > app_info_->stream_idle_time)
     {
+        LIVE_DEBUG << "no player timeout.";
        return true; 
     }
 
@@ -83,7 +85,7 @@ UserPtr Session::CreatePublishUser(const ConnectionPtr &conn,
     }
 
     UserPtr user = std::make_shared<User>(conn, stream_, shared_from_this());
-    user->SetAppInfo(app_info_);;
+    user->SetAppInfo(app_info_);
     user->SetDomainName(list[0]);
     user->SetAppName(list[1]);
     user->SetStreamName(list[2]);
@@ -275,6 +277,7 @@ void Session::CloseUserNoLock(const UserPtr &user)
             // 销毁publisher用户
             if(publisher_)
             {
+                // TODO: 流的ReadyTime()有问题，出现-2045681537错误关闭用户
                 LIVE_DEBUG << "remove publisher, session name: "<< session_name_
                         << ", user: " << user->UserId()
                         << ", elapsed:" << user->ElaspsedTime()

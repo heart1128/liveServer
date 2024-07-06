@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-28 22:32:21
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-30 00:10:37
+ * @LastEditTime: 2024-07-06 12:06:53
  * @FilePath: /liveServer/src/live/Stream.cpp
  * @Description:  learn 
  */
@@ -18,7 +18,7 @@ using namespace tmms::base;
 Stream::Stream(const std::string &session_name, Session &s)
 :session_name_(session_name), session_(s), packet_buffer_(packet_buffer_size_)
 {
-    stream_time_ = TTime::NowMS();
+    stream_time_.store(TTime::NowMS());
     start_timestamp_ = TTime::NowMS();
 }
 
@@ -38,7 +38,9 @@ int64_t Stream::SinceStart() const
 /// @return 
 bool Stream::Timeout()
 {
-    auto delta = TTime::NowMS() - stream_time_;
+    // fixbug: stream_time_只是在构造中赋值了，没有更新过，20s之后一定超时
+    // 应该是在每次都有流数据的时候同步更新
+    auto delta = TTime::NowMS() - stream_time_.load();
     if(delta > 20 * 1000)
     {
         return true;
@@ -87,6 +89,9 @@ void Stream::AddPacket(PacketPtr &&packet)
     // 1. 用户可能卡顿之类的，就要校正时间戳
     auto t = time_corrector_.CorrectTimestamp(packet);
     packet->SetTimeStamp(t);
+
+    // 有数据包，要更新stream_time_
+    stream_time_.store(TTime::NowMS());
 
     // 里面是要访问has_video_等多线程变量的，所以加锁
     {
@@ -229,6 +234,7 @@ bool Stream::LocateGop(const PlayerUserPtr &user)
     else
     {
         // 没找到gop，判断是否超时，并且没有在超时的状态
+        // TODO: http播放的时候gop超时
         auto elapse = user->ElaspsedTime();
         if(elapse >= 1000 && !user->wait_timeout_)
         {

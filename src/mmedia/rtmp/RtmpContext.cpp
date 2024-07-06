@@ -1097,6 +1097,7 @@ void RtmpContext::ParseNameAndTcUrl()
         domain = domain.substr(0,p);
     }
 
+    // TODO: 收到域名直接用，如果是ip就要用Dns转成域名
     session_name_.clear();
     session_name_ += domain;
     session_name_ += "/";
