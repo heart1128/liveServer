@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 12:47:20
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-04 15:07:53
+ * @LastEditTime: 2024-07-06 13:16:18
  * @FilePath: /liveServer/src/live/FlvPlayerUser.cpp
  * @Description:  learn 
  */
@@ -102,7 +102,7 @@ UserType FlvPlayerUser::GetUserType() const
 bool FlvPlayerUser::PushFrame(PacketPtr &packet, bool is_header)
 {
     auto cx = connection_->GetContext<FlvContext>(kFlvContext);
-    if(!cx || !cx->Ready())
+    if(!cx || cx->Ready())
     {
         return false;
     }
@@ -124,7 +124,7 @@ bool FlvPlayerUser::PushFrame(PacketPtr &packet, bool is_header)
 bool FlvPlayerUser::PushFrame(std::vector<PacketPtr> &list)
 {
     auto cx = connection_->GetContext<FlvContext>(kFlvContext);
-    if(!cx || !cx->Ready())
+    if(!cx || cx->Ready())
     {
         return false;
     }

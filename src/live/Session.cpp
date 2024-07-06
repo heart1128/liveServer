@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 15:09:16
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-06 11:59:53
+ * @LastEditTime: 2024-07-06 12:12:54
  * @FilePath: /liveServer/src/live/Session.cpp
  * @Description:  learn 
  */
@@ -277,7 +277,6 @@ void Session::CloseUserNoLock(const UserPtr &user)
             // 销毁publisher用户
             if(publisher_)
             {
-                // TODO: 流的ReadyTime()有问题，出现-2045681537错误关闭用户
                 LIVE_DEBUG << "remove publisher, session name: "<< session_name_
                         << ", user: " << user->UserId()
                         << ", elapsed:" << user->ElaspsedTime()

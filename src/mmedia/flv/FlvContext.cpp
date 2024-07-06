@@ -70,6 +70,7 @@ void FlvContext::SendHttpHeader(bool has_video, bool has_audio)
     auto header_node = std::make_shared<BufferNode>((void*)http_header_.data(), http_header_.size());
     bufs_.emplace_back(std::move(header_node));
     WriteFlvHeader(has_video, has_audio);
+    RTMP_DEBUG << " SendHttpHeader. sending_:" << sending_;
     Send();
 }
 
