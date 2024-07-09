@@ -4,7 +4,7 @@
  * @Autor: 
  * @Date: 2024-06-12 15:07:06
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-30 12:19:15
+ * @LastEditTime: 2024-07-06 20:42:57
  */
 #include "RtmpContext.h"
 #include "mmedia/base/MMediaLog.h"
@@ -89,6 +89,7 @@ void RtmpContext::OnWriteComplete()
     }
     else if(state_ == kRtmpMessage) // 发送完了检测
     {
+
         CheckAndSend();
     }
 }

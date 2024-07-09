@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-02 17:00:58
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-04 16:44:50
+ * @LastEditTime: 2024-07-09 15:26:22
  * @FilePath: /tmms/README.md
  * @Description:  learn 
 -->
@@ -37,3 +37,5 @@ flv不是一种协议，是一种数据封装格式，rtmp推流上服务器的�
 
 ## 11. Demux实现
 - flv格式 ： https://www.cnblogs.com/leisure_chn/p/10662941.html
+- 直播推流推上来的音视频数据是通过FLV格式封装的，我们并没有解封装，因为我们实现的直播拉流用的协议是RTMP，刚好又需要FLV格式的封装。但是，接下来我们要实现的HLS协议，却是用的mpegts的封装，所以需要把FLV封装的音视频解封装，然后用mpegts重新封装，生成hls切片。另一方面，音视频在文件（FLV格式）存储和流式传输上存在差别:·音视频文件存储的方式把解码所需的信息放在文件的开始·流式传输需要在每一个单位（每一个TS）都插入解码所需的信息
+- AVC分为：1. avcc 2. annexB格式
