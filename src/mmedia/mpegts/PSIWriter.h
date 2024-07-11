@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-10 10:40:01
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-10 11:06:06
+ * @LastEditTime: 2024-07-10 15:13:36
  * @FilePath: /liveServer/src/mmedia/mpegts/PSIWriter.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 **/
@@ -15,6 +15,9 @@ namespace tmms
 {
     namespace mm
     {
+        /**
+         * @description: PSI是ES/table层的，有四种PSI,分别继承实现
+        **/        
         class PSIWriter
         {
         public:
@@ -25,7 +28,7 @@ namespace tmms
             void SetVersion(uint8_t v);
             int WriteSection(StreamWriter * w, int id, int sec_num, int last_sec_num,uint8_t *buf, int len);
         
-        private:
+        protected:
             void PushSection(StreamWriter * w,uint8_t *buf, int len);
 
             int8_t cc_{-1};     // 计数

@@ -169,6 +169,30 @@ namespace tmms
             kNaluTypeCodedSliceExt = 20,
         }; 
 
+
+        // TS流的类型
+        enum TsStreamType
+        {
+            kTsStreamReserved = 0x00,
+            kTsStreamAudioMp3=0x04,
+            kTsStreamAudioAAC=0xff,
+            kTsStreamVideoMpeg4 = 0x10,
+            kTsStreamAudioMpeg4=0x11,
+            kTsStreamVideoH264=0x1b,
+            kTsStreamVideoH265=0x24,
+            kTsStreamAudioAC3 =0x81,
+            kTsStreamAudioDTS=0x8a,
+            kTsStreamForbidden=0xff,
+        };
+
+        enum AacProfile
+        {
+            AacProfileMain = 0,
+            AacProfileLC = 1,
+            AacProfileSSR = 2,
+            AacProfileReserved = 3,
+        };
+
         struct SampleBuf
         {
             SampleBuf(const char *buf, size_t s)

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-10 10:38:50
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-10 10:38:53
+ * @LastEditTime: 2024-07-11 16:18:52
  * @FilePath: /liveServer/src/mmedia/mpegts/TsTool.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 **/
@@ -125,4 +125,31 @@ uint32_t TsTool::CRC32(const void* buf, int size)
     }
     
     return __crc32_table_driven(__crc32_MPEG_table, buf, size, 0x00, reflect_in, xor_in, reflect_out, xor_out);
+}
+
+void TsTool::WritePts(uint8_t *q, int fourbits, int64_t pts)
+{
+    int val;
+
+    val  = fourbits << 4 | (((pts >> 30) & 0x07) << 1) | 1;
+    *q++ = val;
+    val  = (((pts >> 15) & 0x7fff) << 1) | 1;
+    *q++ = val >> 8;
+    *q++ = val;
+    val  = (((pts) & 0x7fff) << 1) | 1;
+    *q++ = val >> 8;
+    *q++ = val;
+}
+
+bool TsTool::IsCodecHeader(const PacketPtr &packet)
+{
+    if(packet->PacketSize()>1)
+    {
+        const char *b = packet->Data() + 1;
+        if(*b == 0)
+        {
+            return true;
+        }
+    }
+    return false;
 }

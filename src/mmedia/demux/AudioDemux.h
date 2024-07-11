@@ -1,3 +1,11 @@
+/**
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-07-05 13:49:14
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-07-11 15:21:46
+ * @FilePath: /liveServer/src/mmedia/demux/AudioDemux.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+**/
 /*
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-05 13:49:14
@@ -24,6 +32,22 @@ namespace tmms
             ~AudioDemux() = default;
         
             int32_t OnDemux(const char *data, size_t size, std::list<SampleBuf> &list);
+            int32_t GetCodecId() const
+            {
+                return sound_format_;
+            }
+            AACObjectType GetObjectType() const
+            {
+                return aac_object_;
+            }
+            int32_t GetSampleRateIndex() const
+            {
+                return aac_sample_rate_;
+            }
+            uint8_t GetChannel() const
+            {
+                return aac_channel;
+            }
 
         private:
             int32_t DemuxAAC(const char *data, size_t size, std::list<SampleBuf> &list);

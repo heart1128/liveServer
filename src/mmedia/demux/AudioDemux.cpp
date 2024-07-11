@@ -16,7 +16,7 @@ using namespace tmms::mm;
 /// @param data 
 /// @param size 
 /// @param list 
-/// @return 
+/// @return  正确返回0，错误返回-1
 int32_t AudioDemux::OnDemux(const char *data, size_t size, std::list<SampleBuf> &list)
 {
     if(size < 1)

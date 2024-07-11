@@ -15,6 +15,7 @@ using namespace tmms::base;
 #define RTMP_DEBUG_ON 1
 #define HTTP_DEBUG_ON 1
 #define DEMUX_DEBUG_ON 1
+#define MPEGTS_DEBUG_ON 1
 
 
 // 这些可以不开,debug才开
@@ -66,3 +67,20 @@ using namespace tmms::base;
 // 出错和警告必须开
 #define DEMUX_WARN LOG_WARN
 #define DEMUX_ERROR LOG_ERROR
+
+
+//// mpegts
+// 这些可以不开,debug才开
+#ifdef MPEGTS_DEBUG_ON
+#define MPEGTS_TRACE LOG_TRACE << "MPEGTS::"
+#define MPEGTS_DEBUG LOG_DEBUG << "MPEGTS::"
+#define MPEGTS_INFO LOG_INFO << "MPEGTS::"
+#elif
+#define MPEGTS_TRACE if(0) LOG_TRACE 
+#define MPEGTS_DEBUG if(0) LOG_DEBUG 
+#define MPEGTS_INFO if(0) LOG_INFO 
+#endif
+
+// 出错和警告必须开
+#define MPEGTS_WARN LOG_WARN
+#define MPEGTS_ERROR LOG_ERROR

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-02 17:00:58
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-09 18:15:15
+ * @LastEditTime: 2024-07-11 16:51:32
  * @FilePath: /tmms/README.md
  * @Description:  learn 
 -->
@@ -39,3 +39,14 @@ flv不是一种协议，是一种数据封装格式，rtmp推流上服务器的�
 - flv格式 ： https://www.cnblogs.com/leisure_chn/p/10662941.html
 - 直播推流推上来的音视频数据是通过FLV格式封装的，我们并没有解封装，因为我们实现的直播拉流用的协议是RTMP，刚好又需要FLV格式的封装。但是，接下来我们要实现的HLS协议，却是用的mpegts的封装，所以需要把FLV封装的音视频解封装，然后用mpegts重新封装，生成hls切片。另一方面，音视频在文件（FLV格式）存储和流式传输上存在差别:·音视频文件存储的方式把解码所需的信息放在文件的开始·流式传输需要在每一个单位（每一个TS）都插入解码所需的信息
 - AVC分为：1. avcc 2. annexB格式
+
+## 12. Mpegts实现
+Mpegts是一种封装格式，和flv相同，作为传输的。
+这里要实现的就是，从rtmp传输上来的数据是用flv封装的实时流，直播使用
+而需要点播的就要把flv解包封装成MPEGTS结构，使用hls传输。
+1. flv和MPEGTS的音频有两种
+- AAC：两个格式不同，需要转换 flv:ADIF -> MPEGTS:ADTS
+- MP3：格式相同，不需要转换
+2. 视频不同，视频使用H.264（AVC）
+- AVCC：是MPEG-4个格式,flv使用（在NALU前是长度）
+- AnnexB：Mpeg-ts使用（在NALU前不是长度，是标志）
