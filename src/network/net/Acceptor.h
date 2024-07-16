@@ -38,7 +38,7 @@ namespace tmms
             void Open();
             InetAddress addr_;
             AcceptCallback accept_cb_;
-            SocketOpt *socket_opt_;
+            SocketOpt *socket_opt_{nullptr};
         };
     }
 } 

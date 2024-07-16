@@ -56,7 +56,7 @@ bool Config::LoadConfig(const std::string & file)
     Json::Value threadsObj = root["threads"];
     if(!threadsObj.isNull())
     {
-        name_ = threadsObj.asInt();
+        thread_num_ = threadsObj.asInt();
     }
     Json::Value logObj = root["log"];
     if(!logObj.isNull())

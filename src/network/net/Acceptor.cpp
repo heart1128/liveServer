@@ -115,6 +115,7 @@ void Acceptor::Open()
     }
     if(socket_opt_)
     {
+        NETWORK_DEBUG << " delete socket_opt_: ";
         delete socket_opt_;
         socket_opt_ = nullptr;
     }

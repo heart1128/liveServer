@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-02 17:00:58
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-15 15:43:00
+ * @LastEditTime: 2024-07-16 17:41:12
  * @FilePath: /tmms/README.md
  * @Description:  learn 
 -->
@@ -55,3 +55,5 @@ Mpegts是一种封装格式，和flv相同，作为传输的。
    - PSI -》 PAT：节目入口，包含一个PMT(视频原始类型和PID描述)
    - PES -》音频PES, 视频PES
    - TS -》封装流发送
+  
+## 13. HLS实现

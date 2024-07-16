@@ -382,6 +382,9 @@ void LiveService::Start()
 {
     // 1. 启动循环线程池
     ConfigPtr config = sConfigMgr->GetConfig();
+    LIVE_DEBUG << "thread num = " << config->thread_num_
+                << " cpu start = " << config->cpu_start_
+                << " cpus = " << config->cpus_;
     pool_ = new EventLoopThreadPool(config->thread_num_, config->cpu_start_, config->cpus_);
     pool_->Start();
 

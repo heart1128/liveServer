@@ -1,3 +1,4 @@
+
 /*
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 21:34:54
@@ -16,6 +17,7 @@ using namespace tmms::base;
 #define HTTP_DEBUG_ON 1
 #define DEMUX_DEBUG_ON 1
 #define MPEGTS_DEBUG_ON 1
+#define HLS_DEBUG_ON 1
 
 
 // 这些可以不开,debug才开
@@ -84,3 +86,20 @@ using namespace tmms::base;
 // 出错和警告必须开
 #define MPEGTS_WARN LOG_WARN
 #define MPEGTS_ERROR LOG_ERROR
+
+
+//// HLS
+// 这些可以不开,debug才开
+#ifdef HLS_DEBUG_ON
+#define HLS_TRACE LOG_TRACE << "HLS::"
+#define HLS_DEBUG LOG_DEBUG << "HLS::"
+#define HLS_INFO LOG_INFO << "HLS::"
+#elif
+#define HLS_TRACE if(0) LOG_TRACE 
+#define HLS_DEBUG if(0) LOG_DEBUG 
+#define HLS_INFO if(0) LOG_INFO 
+#endif
+
+// 出错和警告必须开
+#define HLS_WARN LOG_WARN
+#define HLS_ERROR LOG_ERROR
