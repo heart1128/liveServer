@@ -120,7 +120,7 @@ int32_t AudioEncoder::WriteAudioPes(StreamWriter *write, std::list<SampleBuf> &r
 
     while(payload_size > 0 && !result.empty())
     {
-        memset(buf, 0xff, 188);
+        memset(buf, 0x00, 188);
 
         q = buf;
         *q++ = 0x47;  // sync byte 8bits, fixed 0x47
@@ -132,7 +132,7 @@ int32_t AudioEncoder::WriteAudioPes(StreamWriter *write, std::list<SampleBuf> &r
         }
         *q++ = val;
         *q++ = pid_;
-        cc_ = (cc_ + 1) & 0xff; // cc实际记录的是-1的值
+        cc_ = (cc_ + 1) & 0xf; // cc实际记录的是-1的值, 4位
         *q++ = 0x10 | cc_; // 10 适配标识
 
         // pes packet header，只有开始需要写头
@@ -142,7 +142,7 @@ int32_t AudioEncoder::WriteAudioPes(StreamWriter *write, std::list<SampleBuf> &r
             *q++ = 0x00;
             *q++ = 0x01;
 
-            *q = 0xc0; // stream_id ,固定值
+            *q++ = 0xc0; // stream_id ,固定值
 
             int32_t len = payload_size + 5 + 3; // pes_packe_length ,在es上封装了pes头
             if(len > 0xffff)
@@ -175,7 +175,7 @@ int32_t AudioEncoder::WriteAudioPes(StreamWriter *write, std::list<SampleBuf> &r
             if(buf[3] & 0x20) // 是否有适配域
             {
                 int32_t af_len = buf[4] + 1;
-                memmove(buf + 4 + af_len +stuffing, buf + 4 + af_len , header_len - (4 + af_len));
+                memmove(buf + 4 + af_len + stuffing, buf + 4 + af_len , header_len - (4 + af_len));
                 buf[4] += stuffing;
                 memset(buf + 4 +af_len, 0xff, stuffing);
             }

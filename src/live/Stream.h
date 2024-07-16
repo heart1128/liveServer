@@ -1,3 +1,11 @@
+/**
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-28 22:25:40
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-07-15 16:32:33
+ * @FilePath: /liveServer/src/live/Stream.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+**/
 /*
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-28 22:25:40
@@ -13,6 +21,8 @@
 #include "live/CodecHeader.h"
 #include "mmedia/base/Packet.h"
 #include "live/PlayerUser.h"
+#include "mmedia/mpegts/TestStreamWriter.h"
+#include "mmedia/mpegts/TsEncoder.h"
 #include <string>
 #include <memory>
 #include <cstdint>
@@ -63,6 +73,7 @@ namespace tmms
 
 
         private:
+            void ProcessMpegts(PacketPtr &packet);
             int64_t data_comming_time_{0}; // 第一个数据什么时候来的
             int64_t start_timestamp_{0};  // 创建流的时间
             int64_t ready_time_{0};         // 流准备好的时间
@@ -85,6 +96,9 @@ namespace tmms
             CodecHeader codec_headers_;
             TimeCorrector time_corrector_;
             std::mutex lock_;
+
+            TestStreamWriter write_;  // mpegts格式写入文件测试
+            TsEncoder encode_;
 
         };  
 

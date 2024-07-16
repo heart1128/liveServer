@@ -29,10 +29,10 @@ int32_t AudioDemux::OnDemux(const char *data, size_t size, std::list<SampleBuf> 
     sound_rate_ = (SoundRate)((*data & 0xc0) >> 2);
     sound_size_ = (SoundSize)((*data & 0x02) << 1);
     sound_type_ = (SoundChannel)(*data & 0x01);
-    DEMUX_DEBUG << "format:" << sound_format_
-                << " rate:" << sound_rate_
-                << " size:" << sound_size_
-                << " type:" << sound_type_;
+    // DEMUX_DEBUG << "format:" << sound_format_
+    //             << " rate:" << sound_rate_
+    //             << " size:" << sound_size_
+    //             << " type:" << sound_type_;
     
     // mp3是2
     if(sound_format_ == kAudioCodecIDMP3)

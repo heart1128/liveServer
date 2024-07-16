@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-09 14:22:36
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-09 15:17:08
+ * @LastEditTime: 2024-07-15 17:21:50
  * @FilePath: /liveServer/src/mmedia/demux/VideoDemux.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 **/
@@ -15,6 +15,7 @@ using namespace tmms::mm;
 int32_t VideoDemux::OnDemux(const char *data, size_t size, std::list<SampleBuf> &outs)
 {
     VideoCodecID id = (VideoCodecID)(*data & 0x0f);
+    codec_id_ = id;
     // 只做了AVC格式支持（H.264）
     if(id != kVideoCodecIDAVC)
     {
@@ -221,7 +222,7 @@ int32_t VideoDemux::DecodeAVCSeqHeader(const char *data, size_t size, std::list<
         return -1;
     }
     int16_t pps_length = BytesReader::ReadUint16T(data + 1); // 16bit
-    if(pps_length > 0 && pps_length < size - 3)
+    if(pps_length > 0 && pps_length <= size - 3)
     {
         DEMUX_DEBUG << "found pps, bytes:" << pps_length;
     }

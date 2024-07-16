@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-02 17:00:58
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-11 16:51:32
+ * @LastEditTime: 2024-07-15 15:43:00
  * @FilePath: /tmms/README.md
  * @Description:  learn 
 -->
@@ -50,3 +50,8 @@ Mpegts是一种封装格式，和flv相同，作为传输的。
 2. 视频不同，视频使用H.264（AVC）
 - AVCC：是MPEG-4个格式,flv使用（在NALU前是长度）
 - AnnexB：Mpeg-ts使用（在NALU前不是长度，是标志）
+
+3. MEPGTS结构
+   - PSI -》 PAT：节目入口，包含一个PMT(视频原始类型和PID描述)
+   - PES -》音频PES, 视频PES
+   - TS -》封装流发送
