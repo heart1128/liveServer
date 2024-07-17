@@ -22,14 +22,17 @@ namespace
     // Program Clock Reference。结构为33位的低精度部分+6位的填充部分+9位的高精度部分
     int WritePcr(uint8_t *buf, int64_t pcr)
     {
-        int64_t pcr_low = pcr % 300, pcr_high = pcr / 300;
+        int64_t pcrv = (0) & 0x1ff;
+        pcrv |= (0x3f << 9) & 0x7E00;
+        pcrv |= ((pcr) << 15) & 0xFFFFFFFF8000LL;
 
-        *buf++ = pcr_high >> 25;
-        *buf++ = pcr_high >> 17;
-        *buf++ = pcr_high >>  9;
-        *buf++ = pcr_high >>  1;
-        *buf++ = pcr_high <<  7 | pcr_low >> 8 | 0x7e;
-        *buf++ = pcr_low;
+        char *pp = (char*)&pcrv;
+        *buf++ = pp[5];
+        *buf++ = pp[4];
+        *buf++ = pp[3];
+        *buf++ = pp[2];
+        *buf++ = pp[1];
+        *buf++ = pp[0];
 
         return 6;
     }
@@ -44,6 +47,11 @@ int32_t VideoEncoder::EncodeVideo(StreamWriter *writer, bool key, PacketPtr &dat
     {
         MPEGTS_ERROR << "video demux error.";
         return -1;
+    }
+    // 不处理codecHeader，在开头已经发过了
+    if(TsTool::IsCodecHeader(data))
+    {
+        return 0;
     }
 
     writer->AppendTimeStamp(dts);
@@ -65,15 +73,16 @@ void VideoEncoder::SetStreamType(TsStreamType type)
     type_ = type;
 }
 
-int32_t VideoEncoder::EncodeAvc(StreamWriter *writer, std::list<SampleBuf> &sample_list, bool key, int64_t pts)
+int32_t VideoEncoder::EncodeAvc(StreamWriter *writer, std::list<SampleBuf> &sample_list, bool key, int64_t dts)
 {
     int32_t total_size = 0;
     std::list<SampleBuf> result;
+    bool startcode_inserted_ = true;
     if(demux_.HasAud()) // aud是NALU header中的分隔符
     {
         static uint8_t default_aud_nalu[] = {0x09, 0xf0}; // 固定的分隔符
         static SampleBuf default_aud_buf((const char*)&default_aud_nalu[0], 2);
-        total_size += AvcInsertStartCode(result, key); // 先在前面插入stattcode, aud也要
+        total_size += AvcInsertStartCode(result, startcode_inserted_); // 先在前面插入stattcode, aud也要
         result.push_back(default_aud_buf);
         total_size += 2;
     }
@@ -89,51 +98,56 @@ int32_t VideoEncoder::EncodeAvc(StreamWriter *writer, std::list<SampleBuf> &samp
         // 处理原始数据（NALU）
         auto bytes = l.addr;
         NaluType type = (NaluType)(bytes[0] & 0x1f); //NALU单元的类型
-        if(type == kNaluTypeIDR && !demux_.HasSpsPps() && !sps_pps_appended_) // idr帧，没有sps或者pps，要先发sps或者Pps
+        if(type == kNaluTypeIDR && !demux_.HasSpsPps() && 
+            (writer->GetSPS() != demux_.GetSPS() ||
+             writer->GetPPS() != demux_.GetPPS() ||
+             !writer->GetSpsPpsAppended())) // idr帧，每个分片发一次pps和sps，在分片内的都是一样的
         {
-            auto sps = demux_.GetSPS();
+            auto const& sps = demux_.GetSPS(); // fixbug:下面是保存sps的地址sps.data()，但是这里是局部变量，地址出去之后被修改，换成const就在全局常量区了，不会被修规哎
             if(!sps.empty())
             {
                 // 每个NALU之前都要加start code
-                total_size += AvcInsertStartCode(result, key);
+                total_size += AvcInsertStartCode(result, startcode_inserted_);
                 result.emplace_back(sps.data(), sps.size());
                 total_size += sps.size();
+                writer->SetSPS(sps); // 这个分片第一次保存sps，直到下次分片的不同
             }
             else
             {
                 MPEGTS_ERROR << "no sps.";
             }
 
-            auto pps = demux_.GetPPS();
-            if(!sps.empty())
+            auto const &pps = demux_.GetPPS();
+            if(!pps.empty())
             {
                 // 每个NALU之前都要加start code
-                total_size += AvcInsertStartCode(result, key);
+                total_size += AvcInsertStartCode(result, startcode_inserted_);
                 result.emplace_back(pps.data(), pps.size());
                 total_size += pps.size();
+                writer->SetPPS(pps);
             }
             else
             {
                 MPEGTS_ERROR << "no pps.";
             }
-            sps_pps_appended_ = true; // 只发送一次
+            writer->SetSpsPpsAppended(true); // 分片内只发送一次
         }
 
         // 写入视频数据
-        total_size += AvcInsertStartCode(result, key);
+        total_size += AvcInsertStartCode(result, startcode_inserted_);
         result.emplace_back(l.addr, l.size);
         total_size += l.size;
     }
-    // 处理dts，dts需要加上偏差时间，音频就不需要。防止视频播放卡顿
-    int64_t dts = pts;
+    // 处理dts，pts需要加上偏差时间，音频就不需要。防止视频播放卡顿
+    int64_t pts = dts;
     if(demux_.GetCST() > 0)
     {
-        dts = dts + demux_.GetCST() * 90;
+        pts = dts + demux_.GetCST() * 90;
     }
     return WriteVideoPes(writer, result, total_size, pts, dts, key);
 }
 
-int32_t VideoEncoder::AvcInsertStartCode(std::list<SampleBuf> &sample_list, bool &key)
+int32_t VideoEncoder::AvcInsertStartCode(std::list<SampleBuf> &sample_list, bool &startcode_inserted_)
 {
    if(startcode_inserted_) // 不是第一个startcode，是插入0x000001
    {
@@ -191,7 +205,7 @@ int32_t VideoEncoder::WriteVideoPes(StreamWriter *writer, std::list<SampleBuf> &
                 buf[5] = 0x10;
 
                 q = get_start_payload(buf);
-                auto size = WritePcr(q, dts); // pcr就是解码时间戳，以idr帧为同步时间戳
+                auto size = WritePcr(q, pts); // pcr就是播放时间戳，以idr帧为同步时间戳
                 buf[4] += size;
                 q = get_start_payload(buf);
             }

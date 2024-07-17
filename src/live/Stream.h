@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-28 22:25:40
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-15 16:32:33
+ * @LastEditTime: 2024-07-17 11:20:40
  * @FilePath: /liveServer/src/live/Stream.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 **/
@@ -21,7 +21,7 @@
 #include "live/CodecHeader.h"
 #include "mmedia/base/Packet.h"
 #include "live/PlayerUser.h"
-#include "mmedia/mpegts/TestStreamWriter.h"
+#include "mmedia/hls/HLSMuxer.h"
 #include "mmedia/mpegts/TsEncoder.h"
 #include <string>
 #include <memory>
@@ -63,6 +63,15 @@ namespace tmms
 
             bool HasVideo() const;
             bool HasAudio() const;
+            std::string PlayList()
+            {
+                return muxer_.PlayList();
+            }
+
+            FragmentPtr GetFragment(const std::string &name)
+            {
+                return muxer_.GetFragment(name);
+            }
 
         private:
             void SetReady(bool ready);
@@ -73,7 +82,7 @@ namespace tmms
 
 
         private:
-            void ProcessMpegts(PacketPtr &packet);
+            void ProcessHls(PacketPtr &packet);
             int64_t data_comming_time_{0}; // 第一个数据什么时候来的
             int64_t start_timestamp_{0};  // 创建流的时间
             int64_t ready_time_{0};         // 流准备好的时间
@@ -97,8 +106,8 @@ namespace tmms
             TimeCorrector time_corrector_;
             std::mutex lock_;
 
-            TestStreamWriter write_;  // mpegts格式写入文件测试
-            TsEncoder encode_;
+            // TestStreamWriter write_;  // mpegts格式写入文件测试
+            HLSMuxer muxer_;  // 在流不断的解析过程中，不断产生hls切片
 
         };  
 

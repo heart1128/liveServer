@@ -40,7 +40,8 @@ int32_t Fragment::Write(void *buf, uint32_t size)
     }
 
     memcpy(data_->Data() + data_->PacketSize(), buf, size);
-
+    data_->UpdatePacketSize(size);
+    data_size_ += size;
     return size;
 }
 
@@ -97,6 +98,7 @@ void Fragment::Reset()
     {
         data_->SetPacketSize(0);
     }
+    sps_pps_appended_ = false; // 每个新的切片都要发一次sps和pps
 }
 
 PacketPtr &Fragment::FragmentData()

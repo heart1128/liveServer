@@ -1,12 +1,17 @@
 #include "HLSMuxer.h"
 #include "mmedia/base/MMediaLog.h"
 #include "mmedia/base/AVTypes.h"
+#include "base/StringUtils.h"
 
 using namespace tmms::mm;
 
-HLSMuxer::HLSMuxer(const std::string &name)
-:stream_name_(name)
+HLSMuxer::HLSMuxer(const std::string &session_name)
 {
+    auto list = base::StringUtils::SplitString(session_name, "/");
+    if(list.size() == 3)
+    {
+        stream_name_ = list[2];
+    }
 }
 
 /// @brief 获取m3u8内容

@@ -16,13 +16,12 @@ uint32_t TimeCorrector::CorrectTimestamp(const PacketPtr &packet)
     // 一个正常的数据包，通常整个pakcet是用flv包装的
     if(!CodecUtils::IsCodecHeader(packet))
     {
-        int32_t pt = packet->PacketType();
-        // 包的类型是视频包
-        if(pt == kPacketTypeVideo)
+        // 包的类型是视频包，不能直接判断包类型
+        if(packet->IsVideo())
         {
             return CorrectVideoTimeStampByVideo(packet);
         }
-        else if(pt == kPacketTypeAudio)
+        else if(packet->IsAudio())
         {
             return CorrectAudioTimeStampByAudio(packet);
         }

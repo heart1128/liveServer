@@ -16,7 +16,7 @@ using namespace tmms::live;
 using namespace tmms::base;
 
 Stream::Stream(const std::string &session_name, Session &s)
-:session_name_(session_name), session_(s), packet_buffer_(packet_buffer_size_)
+:session_name_(session_name), session_(s), packet_buffer_(packet_buffer_size_), muxer_(session_name)
 {
     stream_time_.store(TTime::NowMS());
     start_timestamp_ = TTime::NowMS();
@@ -132,7 +132,7 @@ void Stream::AddPacket(PacketPtr &&packet)
 
         // 增加帧，其中只有到了关键帧才会添加进gop容器，其他的都是累计长度
         gop_mgr_.AddFrame(packet);
-        ProcessMpegts(packet); // 拿到flv数据，处理成mpegts格式给hls使用
+        ProcessHls(packet); // 拿到flv数据，处理成mpegts格式给hls使用
         packet_buffer_[index % packet_buffer_size_] = std::move(packet);
         // 超过最大帧大小，就清理gop容器
         auto min_idx = frame_index_ - packet_buffer_size_;
@@ -405,25 +405,15 @@ void Stream::GetNextFrame(const PlayerUserPtr &user)
     }
 }
 
-/// @brief 在stream中处理mpegts发送
+/// @brief 在stream中处理mpegts，组装成hls切片
 /// @param packet 
-void Stream::ProcessMpegts(PacketPtr &packet)
+void Stream::ProcessHls(PacketPtr &packet)
 {
-    if(CodecUtils::IsCodecHeader(packet))
+    // 需要支持hls，配置文件中修改
+    if(!session_.GetAppInfo()->hls_support)
     {
-        char *data = packet->Data(); // Audio tags
-
-        if(packet->IsAudio())
-        {
-            AudioCodecID id = (AudioCodecID)((*data & 0xf0) >> 4); // 高4位表示了音频类型MP3 aac
-            encode_.SetStreamType(&write_, kVideoCodecIDReserved, id);
-        }
-        if(packet->IsVideo())
-        {
-            VideoCodecID id = (VideoCodecID)((*data & 0x0f) >> 4); // 低四位表示了音频类型MP3 aac
-            encode_.SetStreamType(&write_,id, kAudioCodecIDReserved);
-        }
+        return;
     }
 
-    encode_.Encode(&write_, packet, packet->TimeStamp());
+    muxer_.OnPacket(packet);
 }

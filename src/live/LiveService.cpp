@@ -285,6 +285,12 @@ bool LiveService::OnSentNextChunk(const TcpConnectionPtr &conn)
 /// @param packet 
 void LiveService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &req, const PacketPtr &packet)
 {
+    auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
+    if(!http_cxt)
+    {
+        LIVE_ERROR << "no found http context.something must be wrong.";
+        return;
+    }
     if(req->IsRequest())
     {
         LIVE_DEBUG << "req method:" << req->Method() << " path:" << req->Path();
@@ -309,13 +315,9 @@ void LiveService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &
         auto list = base::StringUtils::SplitString(req->Path(), "/");
         if(list.size() < 4) // 至少4个，不然请求非法
         {
-            auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
-            if(http_cxt)
-            {
-                auto res = HttpRequest::NewHttp400Response();
-                http_cxt->PostRequest(res);
-                return;
-            }
+            auto res = HttpRequest::NewHttp400Response();
+            http_cxt->PostRequest(res);
+            return;
         }
 
         const std::string &domain = list[1];
@@ -332,40 +334,37 @@ void LiveService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &
             stream_name = base::StringUtils::FileName(filename); // 去.flv
         }
 
+        // 要传输flv了，创建一个session管理用户stream
+        std::string session_name = domain + "/" + app + "/" + stream_name;
+        LIVE_DEBUG << "flv play session name:" << session_name;
+        // 查找session_name。有没有这个推流存在，如果有就用flv封装用http发送播放
+        // 没有就创建一个新的（配置文件里面存在的）
+        auto s = CreateSession(session_name);
+        if(!s)
+        {
+            LIVE_ERROR << "can't create session name:" << session_name; 
+            auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
+            if(http_cxt)
+            {
+                // 如果服务器出问题主动关闭连接，就会出现大量的time_wait状态
+                // 返会404，客户端就会主动关闭
+                auto res = HttpRequest::NewHttp404Response();
+                http_cxt->PostRequest(res);
+                return;
+            }
+        }
+
         std::string ext = base::StringUtils::Extension(filename); // 后缀
         if(ext == "flv")
         {
-            // 要传输flv了，创建一个session管理用户stream
-            std::string session_name = domain + "/" + app + "/" + stream_name;
-            LIVE_DEBUG << "flv play session name:" << session_name;
-            // 查找session_name。有没有这个推流存在，如果有就用flv封装用http发送播放
-            // 没有就创建一个新的（配置文件里面存在的）
-            auto s = CreateSession(session_name);
-            if(!s)
-            {
-                LIVE_ERROR << "can't create session name:" << session_name; 
-                auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
-                if(http_cxt)
-                {
-                    // 如果服务器出问题主动关闭连接，就会出现大量的time_wait状态
-                    // 返会404，客户端就会主动关闭
-                    auto res = HttpRequest::NewHttp404Response();
-                    http_cxt->PostRequest(res);
-                    return;
-                }
-            }
-
+            
             auto user = s->CreatePlayerUser(conn, session_name, "", UserType::kUserTypePlayerFlv);
             if(!user)
             {
                 LIVE_ERROR << "can't create user session name:" << session_name; 
-                auto http_cxt = conn->GetContext<HttpContext>(kHttpContext);
-                if(http_cxt)
-                {
-                    auto res = HttpRequest::NewHttp404Response();
-                    http_cxt->PostRequest(res);
-                    return;
-                }
+                auto res = HttpRequest::NewHttp404Response();
+                http_cxt->PostRequest(res);
+                return;
             }
             conn->SetContext(kUserContext, user);
             // 因为flv使用的是httpcontext处理发送，所以调用不到flvContext，这里创建一个
@@ -374,6 +373,43 @@ void LiveService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &
             conn->SetContext(kFlvContext, flv);
             // 用户加入到播放session的播放列表
             s->AddPlayer(std::dynamic_pointer_cast<PlayerUser>(user));
+        }
+        else if(ext == "m3u8") // 先请求,m3u8
+        {
+            // stream里面包含了组装m3u8的函数，这是通过解析出来的，作为响应
+            auto playList = s->GetStream()->PlayList();
+            if(!playList.empty())
+            {
+                auto res = std::make_shared<HttpRequest>(false);
+                res->AddHeader("server", "tmms");
+                res->AddHeader("content-length", std::to_string(playList.size()));
+                res->AddHeader("content-type", "application/vnd.apple.mpegurl");
+                res->SetBody(playList);
+                res->SetStatusCode(200);
+                http_cxt->PostRequest(res);
+            }
+            else
+            {
+                LIVE_ERROR << "can't create user session name:" << session_name; 
+                auto res = HttpRequest::NewHttp404Response();
+                http_cxt->PostRequest(res);
+                return;
+            }
+        }
+        else if(ext == "ts")  // 后面就是ts
+        {
+            LIVE_DEBUG << "request ts:" << filename; 
+            auto frag = s->GetStream()->GetFragment(filename);
+            if(frag)
+            {
+                auto res = std::make_shared<HttpRequest>(false);
+                res->AddHeader("server", "tmms");
+                res->AddHeader("content-length", std::to_string(frag->Size()));
+                res->AddHeader("content-type", "video/MP2T");
+                res->SetStatusCode(200);
+
+                http_cxt->PostRequest(res->MakeHeaders(), frag->FragmentData()); 
+            }
         }
     }
 }
@@ -397,6 +433,7 @@ void LiveService::Start()
     {
         for(auto &s : services)
         {
+            // 因为socketopt设置了REUESPORT，可以同时多线程绑定同ip和端口，内核决定负载均衡
             LIVE_DEBUG << "s->protocpl:" << s->protocol << "  s->port:" << s->port;
             if(s->protocol == "RTMP" || s->protocol == "rtmp")
             {

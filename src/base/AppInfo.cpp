@@ -1,3 +1,11 @@
+/**
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-06-25 20:25:32
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-07-17 14:45:48
+ * @FilePath: /liveServer/src/base/AppInfo.cpp
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+**/
 /*
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-23 18:16:49
@@ -41,15 +49,15 @@ bool AppInfo::ParseAppInfo(Json::Value &root)
     }
 
     Json::Value flvObj = root["flv_support"];
-    if(!hlsObj.isNull())
+    if(!flvObj.isNull())
     {
-        flv_support = hlsObj.asString() == "on" ? true : false;
+        flv_support = flvObj.asString() == "on" ? true : false;
     }
 
     Json::Value rtmpObj = root["rtmp_support"];
-    if(!hlsObj.isNull())
+    if(!rtmpObj.isNull())
     {
-        rtmp_support = hlsObj.asString() == "on" ? true : false;
+        rtmp_support = rtmpObj.asString() == "on" ? true : false;
     }
 
     Json::Value clObj = root["content_latency"];
