@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-28 22:25:40
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-17 11:20:40
+ * @LastEditTime: 2024-07-18 13:51:42
  * @FilePath: /liveServer/src/live/Stream.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 **/
@@ -17,10 +17,10 @@
 #pragma once
 
 #include "live/base/TimeCorrector.h"
-#include "live/GopMgr.h"
-#include "live/CodecHeader.h"
+#include "live/base/GopMgr.h"
+#include "live/base/CodecHeader.h"
 #include "mmedia/base/Packet.h"
-#include "live/PlayerUser.h"
+#include "live/user/PlayerUser.h"
 #include "mmedia/hls/HLSMuxer.h"
 #include "mmedia/mpegts/TsEncoder.h"
 #include <string>

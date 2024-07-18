@@ -7,7 +7,7 @@
  * @Description:  learn 
  */
 #include "RtmpPlayerUser.h"
-#include "Stream.h"
+#include "live/Stream.h"
 #include "mmedia/rtmp/RtmpContext.h"
 #include "live/base/LiveLog.h"
 #include "base/TTime.h"

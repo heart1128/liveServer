@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-25 20:25:32
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-17 14:45:48
+ * @LastEditTime: 2024-07-17 16:55:42
  * @FilePath: /liveServer/src/base/AppInfo.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 **/
@@ -17,6 +17,7 @@
 #include "AppInfo.h"
 #include "base/DomainInfo.h"
 #include "base/LogStream.h"
+#include "Target.h"
 
 using namespace tmms::base;
 
@@ -76,6 +77,16 @@ bool AppInfo::ParseAppInfo(Json::Value &root)
     if(!sttObj.isNull())
     {
         stream_timeout_time = sttObj.asUInt();
+    }
+
+    Json::Value pullObj = root["pull"];  // 回源
+    if(!pullObj.isNull() &&pullObj.isArray())
+    {
+        for(auto &a : pullObj)
+        {
+            TargetPtr p = std::make_shared<Target>(domain_name, app_name);
+            p->ParseTarget(a);
+        }
     }
 
     LOG_INFO << "app name:" << app_name

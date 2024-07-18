@@ -1,6 +1,6 @@
 #include "User.h"
 #include "base/TTime.h"
-#include "Stream.h"
+#include "live/Stream.h"
 
 using namespace tmms::live;
 

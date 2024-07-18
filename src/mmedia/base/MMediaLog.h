@@ -25,7 +25,7 @@ using namespace tmms::base;
 #define RTMP_TRACE LOG_TRACE << "RTMP::"
 #define RTMP_DEBUG LOG_DEBUG << "RTMP::"
 #define RTMP_INFO LOG_INFO << "RTMP::"
-#elif
+#else
 #define RTMP_TRACE if(0) LOG_TRACE 
 #define RTMP_DEBUG if(0) LOG_DEBUG 
 #define RTMP_INFO if(0) LOG_INFO 
@@ -42,7 +42,7 @@ using namespace tmms::base;
 #define HTTP_TRACE LOG_TRACE << "HTTP::"
 #define HTTP_DEBUG LOG_DEBUG << "HTTP::"
 #define HTTP_INFO LOG_INFO << "HTTP::"
-#elif
+#else
 #define HTTP_TRACE if(0) LOG_TRACE 
 #define HTTP_DEBUG if(0) LOG_DEBUG 
 #define HTTP_INFO if(0) LOG_INFO 
@@ -60,7 +60,7 @@ using namespace tmms::base;
 #define DEMUX_TRACE LOG_TRACE << "DEMUX::"
 #define DEMUX_DEBUG LOG_DEBUG << "DEMUX::"
 #define DEMUX_INFO LOG_INFO << "DEMUX::"
-#elif
+#else
 #define DEMUX_TRACE if(0) LOG_TRACE 
 #define DEMUX_DEBUG if(0) LOG_DEBUG 
 #define DEMUX_INFO if(0) LOG_INFO 
@@ -77,7 +77,7 @@ using namespace tmms::base;
 #define MPEGTS_TRACE LOG_TRACE << "MPEGTS::"
 #define MPEGTS_DEBUG LOG_DEBUG << "MPEGTS::"
 #define MPEGTS_INFO LOG_INFO << "MPEGTS::"
-#elif
+#else
 #define MPEGTS_TRACE if(0) LOG_TRACE 
 #define MPEGTS_DEBUG if(0) LOG_DEBUG 
 #define MPEGTS_INFO if(0) LOG_INFO 
@@ -94,7 +94,7 @@ using namespace tmms::base;
 #define HLS_TRACE LOG_TRACE << "HLS::"
 #define HLS_DEBUG LOG_DEBUG << "HLS::"
 #define HLS_INFO LOG_INFO << "HLS::"
-#elif
+#else
 #define HLS_TRACE if(0) LOG_TRACE 
 #define HLS_DEBUG if(0) LOG_DEBUG 
 #define HLS_INFO if(0) LOG_INFO 

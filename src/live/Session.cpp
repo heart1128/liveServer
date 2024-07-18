@@ -12,8 +12,8 @@
 #include "base/AppInfo.h"
 #include "live/base/LiveLog.h"
 #include "base/StringUtils.h"
-#include "RtmpPlayerUser.h"
-#include "FlvPlayerUser.h"
+#include "live/user/RtmpPlayerUser.h"
+#include "live/user/FlvPlayerUser.h"
 
 using namespace tmms::live;
 

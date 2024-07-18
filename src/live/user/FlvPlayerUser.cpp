@@ -7,7 +7,7 @@
  * @Description:  learn 
  */
 #include "FlvPlayerUser.h"
-#include "Stream.h"
+#include "live/Stream.h"
 #include "mmedia/flv/FlvContext.h"
 #include "live/base/LiveLog.h"
 #include "base/TTime.h"

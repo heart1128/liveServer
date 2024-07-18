@@ -8,9 +8,10 @@
  */
 #pragma once
 
-#include "PlayerUser.h"
+
+#include "live/user/PlayerUser.h"
 #include "base/AppInfo.h"
-#include "User.h"
+#include "live/user/User.h"
 #include <string>
 #include <mutex>
 #include <unordered_set>
