@@ -22,11 +22,13 @@ namespace tmms
     namespace live
     {
         using UserPtr = std::shared_ptr<User>;
+        class PullerRelay; // 因为PullerRelay包含了session头文件，所以只能用前置声明的方式
 
         class Session : public std::enable_shared_from_this<Session>
         {
         public:
             explicit Session(const std::string &session_name);
+            ~Session();
         /// 时间函数
             int32_t ReadyTime() const; // 会话准备好的时间，和流准备好的时间一致
             int64_t SinceStart() const;
@@ -64,6 +66,8 @@ namespace tmms
             UserPtr publisher_; // 推流用户，一个推流对应多个播放
             std::mutex lock_;
             std::atomic<int64_t> player_live_time_;
+
+            PullerRelay * pull_;  // session回源
         };
         
     } // namespace live

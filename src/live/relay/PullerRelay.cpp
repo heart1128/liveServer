@@ -3,6 +3,8 @@
 #include "live/LiveService.h"
 #include "base/Target.h"
 #include "base/StringUtils.h"
+#include "live/relay/pull/RtmpPuller.h"
+#include "live/LiveService.h"
 
 using namespace tmms::live;
 
@@ -26,7 +28,7 @@ void PullerRelay::StartPullStream()
         PULLER_ERROR << " no target found.";
         sLiveService->CloseSession(session_.SessionName());
     }
-
+    // 调用rtmpPuller回源
     Pull();
 }
 
@@ -56,8 +58,17 @@ bool PullerRelay::GetTargets()
     return false;
 }
 
+/// @brief 根据协议创建puller
+/// @param p 
+/// @return 
 Puller *PullerRelay::GetPuller(TargetPtr p)
 {
+    current_loop_ = sLiveService->GetNextLoop();
+    if(p->protocol == "RTMP" || p->protocol == "rtmp")
+    {
+        // rtmp各种服务都会通知上层，也就是这里
+        return new RtmpPuller(current_loop_, &session_, this);
+    }
     return nullptr;
 }
 
@@ -95,6 +106,7 @@ void PullerRelay::SelectTarget()
     else
     {
         PULLER_ERROR << "try all targets, but no stream found.";
+        ClearPuller();
         sLiveService->CloseSession(session_.SessionName());
     }
 }
@@ -112,6 +124,7 @@ void PullerRelay::Pull()
     // 第一次尝试，或者设定为回源没有间隔，不断禅尝试
     if(current_target_->retry == 0 || current_target_->interval == 0)
     {
+        // 这个Puller就是RtmpPuller
         if(puller_)
         {
             puller_->Pull(current_target_);
@@ -122,7 +135,7 @@ void PullerRelay::Pull()
         Puller *p = puller_;
         TargetPtr t = current_target_;
         // 定时到下次回源时间
-        current_loop_->RunAfter(current_target_->interval,[p, &t](){
+        current_loop_->RunAfter(current_target_->interval,[p, t](){
             if(p)
             {
                 p->Pull(t);

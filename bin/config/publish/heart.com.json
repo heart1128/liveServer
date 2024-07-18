@@ -11,7 +11,16 @@
                 "hls_support" : "on",
                 "flv_support" : "on",
                 "rtmp_support" : "on",
-                "content_latency" : 3
+                "content_latency" : 3,
+                "pull":
+                [
+                    {
+                        "protocol" : "rtmp",
+                        "host" : "heart.com:1936",
+                        "interval" : 1,
+                        "max_retry" : 2
+                    }
+                ]
             }
         ]
     }

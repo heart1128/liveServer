@@ -14,6 +14,7 @@
 #include "base/StringUtils.h"
 #include "live/user/RtmpPlayerUser.h"
 #include "live/user/FlvPlayerUser.h"
+#include "live/relay/PullerRelay.h"
 
 using namespace tmms::live;
 
@@ -29,6 +30,15 @@ Session::Session(const std::string &session_name)
     // 流创建
     stream_ = std::make_shared<Stream>(session_name, *this);
     player_live_time_ = TTime::NowMS();
+}
+
+Session::~Session()
+{
+    if(pull_)
+    {
+        delete pull_;
+    }
+    LIVE_DEBUG << "session:" << session_name_ << " destroy.now:" << base::TTime::NowMS();
 }
 
 /// @brief 会话准备好的时间，和流的时间一致
@@ -148,7 +158,8 @@ void Session::CloseUser(const UserPtr &user)
     {
         {
             std::lock_guard<std::mutex> lk(lock_);
-            if(user->GetUserType() <= UserType::kUserTypePlayerWebRTC)
+            // fixbug:这里应该是判断Publis类型，如果是player，在播放用户关闭的时候，进入判断，推流用户也关闭了
+            if(user->GetUserType() <= UserType::kUserTypePublishWebRtc)
             {
                 // 销毁publisher用户
                 if(publisher_)
@@ -199,7 +210,12 @@ void Session::AddPlayer(const PlayerUserPtr &user)
     // 在这rtmp服务器没有流媒体内容，需要从别的服务器找到Publisher
     if(!publisher_)
     {
-        // TODO 回源实现
+        if(!pull_)
+        {
+            pull_ = new PullerRelay(*this);
+        }
+        // 1. 获取回源配置文件， 2. 启动pull()
+        pull_->StartPullStream();
     }
     user->Avtive();
 }
