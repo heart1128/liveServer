@@ -13,16 +13,34 @@
     "services" :
     [
         {
-            "addr" : "heart.com",
+            "addr" : "0.0.0.0",
             "port" : 1935,
             "portocol" : "rtmp",
             "transport" : "tcp"
         },
         {
-            "addr" : "heart.com",
+            "addr" : "0.0.0.0",
             "port" : 8080,
             "portocol" : "http",
             "transport" : "tcp"
+        },
+        {
+            "addr" : "0.0.0.0",
+            "port" : 8081,
+            "portocol" : "http",
+            "transport" : "webrtc"
+        },
+        {
+            "addr" : "0.0.0.0",
+            "port" : 8081,
+            "portocol" : "http",
+            "transport" : "webrtc"
+        },
+        {
+            "addr" : "172.27.218.130",
+            "port" : 22000,
+            "portocol" : "webrtc",
+            "transport" : "udp"
         }
     ],
     "directory":

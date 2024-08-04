@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 09:04:55
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 14:42:35
- * @FilePath: /tmms/src/network/net/UdpSocket.h
+ * @LastEditTime: 2024-08-04 15:22:41
+ * @FilePath: /liveServer/src/network/net/UdpSocket.h
  * @Description:  learn 
  */
 #pragma once
@@ -22,7 +22,7 @@ namespace tmms
         class UdpSocket;
         using UdpSocketPtr = std::shared_ptr<UdpSocket>;
         /// @brief udp服务器需要处理udp包，需要知道那个udp客户端传过来的，tcp是面向连接的。连接之后客户端地址不需要再次识别 
-        using UdpSocketMessageCallback = std::function<void (const InetAddress &addr, MsgBuffer &buf)>;
+        using UdpSocketMessageCallback = std::function<void (const UdpSocketPtr&, const InetAddress &addr, MsgBuffer &buf)>;
         using UdpSocketCloseConnectionCallback = std::function<void(const UdpSocketPtr&)>;
         using UdpSocketWriteCompleteCallback = std::function<void(const UdpSocketPtr&)>;
         using UdpSocketTimeoutCallback = std::function<void(const UdpSocketPtr&)>;

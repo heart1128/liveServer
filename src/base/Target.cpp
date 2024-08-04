@@ -49,8 +49,8 @@ bool Target::ParseTarget(Json::Value &root)
         auto pos = remote_host.find_first_of(":");
         if(pos != std::string::npos)
         {
-            remote_host = remote_host.substr(0, pos);
             remote_port = std::atoi(remote_host.substr(pos + 1).c_str());
+            remote_host = remote_host.substr(0, pos);
         }
         else    // 设置默认端口
         {

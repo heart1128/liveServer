@@ -3,7 +3,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 21:34:54
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-09 11:25:13
+ * @LastEditTime: 2024-08-04 15:17:45
  * @FilePath: /liveServer/src/mmedia/base/MMediaLog.h
  * @Description:  learn
  */
@@ -18,6 +18,7 @@ using namespace tmms::base;
 #define DEMUX_DEBUG_ON 1
 #define MPEGTS_DEBUG_ON 1
 #define HLS_DEBUG_ON 1
+#define WEBRTC_DEBUG_ON 1 
 
 
 // 这些可以不开,debug才开
@@ -103,3 +104,20 @@ using namespace tmms::base;
 // 出错和警告必须开
 #define HLS_WARN LOG_WARN
 #define HLS_ERROR LOG_ERROR
+
+
+//// WebRtc
+// 这些可以不开,debug才开
+#ifdef WEBRTC_DEBUG_ON
+#define WEBRTC_TRACE LOG_TRACE << "WEBRTC::"
+#define WEBRTC_DEBUG LOG_DEBUG << "WEBRTC::"
+#define WEBRTC_INFO LOG_INFO << "WEBRTC::"
+#else
+#define WEBRTC_TRACE if(0) LOG_TRACE 
+#define WEBRTC_DEBUG if(0) LOG_DEBUG 
+#define WEBRTC_INFO if(0) LOG_INFO 
+#endif
+
+// 出错和警告必须开
+#define WEBRTC_WARN LOG_WARN
+#define WEBRTC_ERROR LOG_ERROR

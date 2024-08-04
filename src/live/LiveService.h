@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:27:09
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-03 11:28:30
+ * @LastEditTime: 2024-08-04 15:43:25
  * @FilePath: /liveServer/src/live/LiveService.h
  * @Description:  learn 
  */
@@ -16,6 +16,7 @@
 #include "base/Singleton.h"
 #include "mmedia/rtmp/RtmpHandler.h"
 #include "mmedia/http/HttpHandler.h"
+#include "mmedia/webrtc/WebrtcServer.h"
 #include <memory>
 #include <vector>
 #include <mutex>
@@ -68,6 +69,8 @@ namespace tmms
             std::vector<TcpServer*> servers_; // 可能有rtmpserver httpserver
             std::mutex lock_;
             std::unordered_map<std::string, SessionPtr> sessions_;
+
+            std::shared_ptr<WebrtcServer> webrtc_server_; // 因为webrtc大部分使用udp，所以单独定义一个使用udp
         };
     
         #define sLiveService tmms::base::Singleton<tmms::live::LiveService>::Instance()

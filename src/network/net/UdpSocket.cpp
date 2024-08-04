@@ -176,7 +176,7 @@ void UdpSocket::OnRead()
             // 消息回调
             if(message_cb_)
             {
-                message_cb_(peeraddr, message_buffer_);
+                message_cb_(std::dynamic_pointer_cast<UdpSocket>(shared_from_this()), peeraddr, message_buffer_);
             }
             // 因为是面向udp数据报的，每次都是一个包的数据处理，不会出现处理完还有数据留在buffer的情况
             message_buffer_.RetrieveAll();

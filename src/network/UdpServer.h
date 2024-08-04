@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-09 14:46:14
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-09 14:49:51
- * @FilePath: /tmms/src/network/UdpServer.h
+ * @LastEditTime: 2024-08-04 15:48:23
+ * @FilePath: /liveServer/src/network/UdpServer.h
  * @Description:  learn 
  */
 #pragma once
@@ -22,7 +22,7 @@ namespace tmms
         class UdpServer : public UdpSocket
         {
         public:
-            UdpServer(EventLoop *loop, InetAddress &server);
+            UdpServer(EventLoop *loop, const InetAddress &server);
             virtual ~UdpServer();
         
         public:

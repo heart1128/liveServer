@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:34:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-06 11:43:19
+ * @LastEditTime: 2024-08-04 15:55:23
  * @FilePath: /liveServer/src/live/LiveService.cpp
  * @Description:  learn 
  */
@@ -19,6 +19,8 @@
 #include "mmedia/http/HttpContext.h"
 #include "network/DnsServer.h"
 #include "mmedia/flv/FlvContext.h"
+#include "live/WebrtcService.h"
+#include "mmedia/webrtc/WebrtcServer.h"
 
 using namespace tmms::live;
 using namespace tmms::mm;
@@ -446,12 +448,41 @@ void LiveService::Start()
             }
             else if(s->protocol == "HTTP" || s->protocol == "http")
             {
-                InetAddress local(s->addr, s->port);
-                // rtmpserver继承tcpserver，this传入作为业务上层，有数据都会通知下面的回调
-                TcpServer* server = new HttpServer(el, local, this);
-                servers_.push_back(server);
-                // 启动tcpServer，设置accept
-                servers_.back()->Start();
+                // 加入了webrtc，如果传输是webrtc
+                if(s->transport == "webrtc" || s->transport == "WEBRTC")
+                {
+                    InetAddress local(s->addr, s->port);
+                    // rtmpserver继承tcpserver，this传入作为业务上层，有数据都会通知下面的回调
+                    TcpServer* server = new HttpServer(el, local, sWebrtcService);
+                    servers_.push_back(server);
+                    // 启动tcpServer，设置accept
+                    servers_.back()->Start();
+                }
+                else
+                {
+                    InetAddress local(s->addr, s->port);
+                    // rtmpserver继承tcpserver，this传入作为业务上层，有数据都会通知下面的回调
+                    TcpServer* server = new HttpServer(el, local, this);
+                    servers_.push_back(server);
+                    // 启动tcpServer，设置accept
+                    servers_.back()->Start();
+                }
+            }
+            else if(s->protocol == "webrtc" || s->protocol == "WEBRTC")
+            {
+                if(s->transport == "udp" || s->transport == "UDP")
+                {
+                    // udp只运行在一个线程上，因为加了地址重复的opt
+                    // 所有每次Loop运行在哪个线程是内核负载均衡的，跳来跳去
+                    // 但是udp运行没有加锁，因为udp写需求大，读基本没有需求
+                    // 所有单线程运行，避免加锁
+                    if(!webrtc_server_)
+                    {
+                        InetAddress local(s->addr, s->port);
+                        webrtc_server_ = std::make_shared<WebrtcServer>(el ,local, sWebrtcService);
+                        webrtc_server_->Start();
+                    }
+                }
             }
         }
     }
