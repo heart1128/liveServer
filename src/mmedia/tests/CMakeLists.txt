@@ -14,3 +14,7 @@ target_link_libraries(RtmpClientTest base network mmedia crypto)
 
 add_executable(HttpClientTest HttpClientTest.cpp)
 target_link_libraries(HttpClientTest base network mmedia crypto jsoncpp.a)
+
+
+add_executable(DtlsCertsTest DtlsCertsTest.cpp)
+target_link_libraries(DtlsCertsTest base network mmedia crypto)
