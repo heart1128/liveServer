@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-02 13:37:15
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-04 14:21:01
+ * @LastEditTime: 2024-08-07 21:35:12
  * @FilePath: /liveServer/src/mmedia/http/HttpRequest.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -290,11 +290,11 @@ HttpRequestPtr HttpRequest::NewHttpOptionsResponse()
     auto res=std::make_shared<HttpRequest>(false);
     res->SetStatusCode(200);
     res->AddHeader("server","tmms");
-    res->AddHeader("content-length","o");
+    res->AddHeader("content-length","0");
     res->AddHeader("content-type","text/plain");
     res->AddHeader("Access-Control-Allow-Origin","*");
-    res->AddHeader("Access-Control-Allow-Methods","POST,GET,OPTIONS");
-    res->AddHeader("Allow","POST,GET,OPTIONS");
+    res->AddHeader("Access-Control-Allow-Methods","POST, GET, OPTIONS");
+    res->AddHeader("Allow","POST, GET, OPTIONS");
     res->AddHeader("Access-Control-Allow-Headers","content-type");
     return res;
 }

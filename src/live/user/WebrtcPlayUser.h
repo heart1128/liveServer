@@ -9,20 +9,40 @@
 #pragma once
 
 #include "PlayerUser.h"
+#include "mmedia/webrtc/Sdp.h"
+#include "mmedia/webrtc/DtlsCerts.h"
+#include <string>
 #include <cstdint>
 
 namespace tmms
 {
     namespace live
     {
+        using namespace mm;
+
         class WebrtcPlayUser : public PlayerUser
         {
         public:
             explicit WebrtcPlayUser(const ConnectionPtr &ptr, const StreamPtr &stream, const SessionPtr &s);
-            ~WebrtcPlayUser() = default;
 
             bool PostFrames() override;
             UserType GetUserType() const override;
+
+            bool ProcessOfferSdp(const std::string &sdp);
+            const std::string &LocalUFrag() const;
+            const std::string &LocalPasswd() const;
+            const std::string &RemoteUFrag() const;
+            
+            std::string BuildAnswerSdp();
+
+        private:
+            static std::string GetUFrag(int size);
+            static uint32_t GetSsrc(int size);
+
+            std::string local_ufrag_;
+            std::string local_passwd_;
+            Sdp sdp_;
+            DtlsCerts dtls_certs_;
         };
         
         

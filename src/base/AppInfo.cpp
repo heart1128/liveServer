@@ -86,6 +86,7 @@ bool AppInfo::ParseAppInfo(Json::Value &root)
         {
             TargetPtr p = std::make_shared<Target>(domain_name, app_name);
             p->ParseTarget(a);
+            pulls.emplace_back(p);
         }
     }
 

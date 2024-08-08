@@ -15,6 +15,7 @@
 #include "live/user/RtmpPlayerUser.h"
 #include "live/user/FlvPlayerUser.h"
 #include "live/relay/PullerRelay.h"
+#include "live/user/WebrtcPlayUser.h"
 
 using namespace tmms::live;
 
@@ -134,6 +135,10 @@ UserPtr Session::CreatePlayerUser(const ConnectionPtr &conn,
     else if(type == UserType::kUserTypePlayerFlv)
     {
         user = std::make_shared<FlvPlayerUser>(conn, stream_, shared_from_this());
+    }
+    else if(type == UserType::kUserTypePlayerWebRTC)
+    {
+        user = std::make_shared<WebrtcPlayUser>(conn, stream_, shared_from_this());
     }
     else
     {

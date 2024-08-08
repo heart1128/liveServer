@@ -311,9 +311,9 @@ void HttpParser::ParseHeaders()
             state_ = kExpectError;
             return;
         }
-        
+    
         // 没有body，请求头解析完直接结束
-        if(current_chunk_length_ == 0)
+        if(current_content_length_ == 0)
         {
             state_ = kExpectHttpComplete;
         }

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 15:04:56
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-29 17:37:08
+ * @LastEditTime: 2024-08-08 00:00:38
  * @FilePath: /liveServer/src/live/Session.h
  * @Description:  learn 
  */
@@ -67,7 +67,7 @@ namespace tmms
             std::mutex lock_;
             std::atomic<int64_t> player_live_time_;
 
-            PullerRelay * pull_;  // session回源
+            PullerRelay * pull_{nullptr};  // session回源
         };
         
     } // namespace live

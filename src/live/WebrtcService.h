@@ -1,3 +1,11 @@
+/*
+ * @Author: heart1128 1020273485@qq.com
+ * @Date: 2024-08-04 11:52:01
+ * @LastEditors: heart1128 1020273485@qq.com
+ * @LastEditTime: 2024-08-05 21:21:02
+ * @FilePath: /liveServer/src/live/WebrtcService.h
+ * @Description:  learn 
+ */
 #pragma once
 
 #include <cstdint>
@@ -33,6 +41,9 @@ namespace tmms
             void OnRecv(const TcpConnectionPtr& conn, const PacketPtr &data)override{} 
             void OnRecv(const TcpConnectionPtr& conn, PacketPtr &&data)override{}
             void OnActive(const ConnectionPtr &conn)override{}
+        
+        private:
+            std::string GetSessionNameFromUrl(const std::string &url);
         };
 
         #define sWebrtcService tmms::base::Singleton<tmms::live::WebrtcService>::Instance()

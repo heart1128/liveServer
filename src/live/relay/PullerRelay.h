@@ -41,6 +41,7 @@ namespace tmms
             TargetPtr current_target_;          // 回源到哪个target了
             int32_t cur_target_index_{-1};
             Puller * puller_{nullptr};
+            // fixbug:没有初始化为空，后面判断一直不为空就不创建对象了
             EventLoop *current_loop_{nullptr};
         };
         
