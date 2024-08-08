@@ -34,6 +34,7 @@ namespace tmms
             const std::string &RemoteUFrag() const;
             
             std::string BuildAnswerSdp();
+            void SetConnection(const ConnectionPtr &conn) override;
 
         private:
             static std::string GetUFrag(int size);

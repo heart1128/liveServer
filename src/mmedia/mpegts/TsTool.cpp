@@ -127,6 +127,28 @@ uint32_t TsTool::CRC32(const void* buf, int size)
     return __crc32_table_driven(__crc32_MPEG_table, buf, size, 0x00, reflect_in, xor_in, reflect_out, xor_out);
 }
 
+uint32_t TsTool::CRC32Ieee(const void *buf, int size)
+{
+    // @see golang IEEE of hash/crc32/crc32.go
+    // IEEE is by far and away the most common CRC-32 polynomial.
+    // Used by ethernet (IEEE 802.3), v.42, fddi, gzip, zip, png, ...
+    // @remark The poly of CRC32 IEEE is 0x04C11DB7, its reverse is 0xEDB88320,
+    //      please read https://en.wikipedia.org/wiki/Cyclic_redundancy_check
+    uint32_t poly = 0x04C11DB7;
+    
+    bool reflect_in = true;
+    uint32_t xor_in = 0xffffffff;
+    bool reflect_out = true;
+    uint32_t xor_out = 0xffffffff;
+    
+    if (!__crc32_MPEG_table_initialized) {
+        __crc32_make_table(__crc32_MPEG_table, poly, reflect_in);
+        __crc32_MPEG_table_initialized = true;
+    }
+    
+    return __crc32_table_driven(__crc32_MPEG_table, buf, size, 0x00, reflect_in, xor_in, reflect_out, xor_out);
+}
+
 void TsTool::WritePts(uint8_t *q, int fourbits, int64_t pts)
 {
     int val;

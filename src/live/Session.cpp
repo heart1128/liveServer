@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 15:09:16
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-06 12:12:54
+ * @LastEditTime: 2024-08-08 19:31:33
  * @FilePath: /liveServer/src/live/Session.cpp
  * @Description:  learn 
  */
@@ -316,7 +316,8 @@ void Session::CloseUserNoLock(const UserPtr &user)
                 << ", ReadyTime:" << ReadyTime()
                 << ", stream time:" << SinceStart();
             // 销毁player用户, publiser也可能是player
-            players_.erase(std::dynamic_pointer_cast<PlayerUser>(user));
+            // 不能在vector循环中操作删除，不然迭代器失效
+            // players_.erase(std::dynamic_pointer_cast<PlayerUser>(user));
             user->Close();
             player_live_time_ = tmms::base::TTime::NowMS();
         }

@@ -269,6 +269,9 @@ void EventLoop::RunInLoop(const Func &f)
 /// @param f 
 void EventLoop::RunInLoop(Func &&f)
 {
+    // 这么做的原因是，如果这个任务不是当前线程的，在这里执行了就会切换到其他线程
+    // 增加了上下文切换以及线程安全的问题，所以不在这个线程的任务就添加到这个线程执行
+    // 不直接执行切换上下文。
     if(IsInLoopThread())
     {
         f();

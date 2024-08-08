@@ -104,6 +104,16 @@ uint64_t User::ElaspsedTime()
     return TTime::NowMS() - start_timestamp_;
 }
 
+/**
+ * @description: 在webrtc中使用，因为在第一次sdp部分使用的是tcp，一次性关闭之后修改为udp
+ * @param {Connection} &conn
+ * @return {*}
+ */
+void User::SetConnection(const ConnectionPtr &conn)
+{
+    connection_ = conn;
+}
+
 void User::Avtive()
 {
     if(connection_)

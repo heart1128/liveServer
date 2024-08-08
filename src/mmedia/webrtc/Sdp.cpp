@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 18:56:39
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 15:23:18
+ * @LastEditTime: 2024-08-08 19:13:43
  * @FilePath: /liveServer/src/mmedia/webrtc/Sdp.cpp
  * @Description:  learn 
  */
@@ -166,7 +166,7 @@ const std::string &Sdp::GetLocalPasswd() const
     return local_passwd_;
 }
 
-const std::string &tmms::mm::Sdp::GetLocalUFrag() const
+const std::string &Sdp::GetLocalUFrag() const
 {
     return local_ufrag_;
 }

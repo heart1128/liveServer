@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 16:34:33
+ * @LastEditTime: 2024-08-08 18:40:06
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -85,6 +85,11 @@ const std::string &WebrtcPlayUser::RemoteUFrag() const
 std::string WebrtcPlayUser::BuildAnswerSdp()
 {
     return sdp_.Encode();
+}
+
+void WebrtcPlayUser::SetConnection(const ConnectionPtr &conn)
+{
+    User::SetConnection(conn);
 }
 
 /**

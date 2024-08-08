@@ -12,7 +12,13 @@ TcpConnection::TcpConnection(EventLoop *loop, int socketfd, const InetAddress &l
 
 TcpConnection::~TcpConnection()
 {
-    OnClose();
+    // 在webrtc中，sdp使用tcp，之后使用udp
+    // 因为在替换udp的时候使用的是udp的线程，tcp不在这个线程中
+    // 所以这样保证一下，在同一个线程中
+    loop_->RunInLoop([this](){
+        OnClose();
+    });
+    NETWORK_DEBUG << "TcpConnection:" << peer_addr_.ToIpPort() << " destroy.";
 }
 
 void TcpConnection::SetCloseCallback(const CloseConnectionCallback &cb)

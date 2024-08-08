@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 11:52:01
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-05 21:21:02
+ * @LastEditTime: 2024-08-08 18:30:20
  * @FilePath: /liveServer/src/live/WebrtcService.h
  * @Description:  learn 
  */
@@ -12,6 +12,7 @@
 #include <string>
 #include "mmedia/webrtc/WebrtcHandler.h"
 #include "mmedia/http/HttpHandler.h"
+#include "live/user/WebrtcPlayUser.h"
 #include "base/Singleton.h"
 
 namespace tmms
@@ -19,6 +20,7 @@ namespace tmms
     namespace live
     {
         using namespace mm;
+        using WebrtcPlayUserPtr = std::shared_ptr<WebrtcPlayUser>;
         class WebrtcService : public WebrtcHandler, public HttpHandler
         {
         public:
@@ -44,6 +46,9 @@ namespace tmms
         
         private:
             std::string GetSessionNameFromUrl(const std::string &url);
+            std::mutex lock_;  // 多线程操作map
+            std::unordered_map<std::string, WebrtcPlayUserPtr> name_users_; // 用户名对player
+            std::unordered_map<std::string, WebrtcPlayUserPtr> users_;      // 在udp没有username的情况下使用
         };
 
         #define sWebrtcService tmms::base::Singleton<tmms::live::WebrtcService>::Instance()

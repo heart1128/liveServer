@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-28 17:43:07
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-29 18:22:18
- * @FilePath: /liveServer/src/live/User.h
+ * @LastEditTime: 2024-08-08 18:38:36
+ * @FilePath: /liveServer/src/live/user/User.h
  * @Description:  learn 
  */
 #pragma once
@@ -80,6 +80,7 @@ namespace tmms
             void Close();
             ConnectionPtr getConnection();
             uint64_t ElaspsedTime(); // 自用户创建开始经历了多少时间
+            virtual void SetConnection(const ConnectionPtr &conn);
             void Avtive();
             void Deactive();
             const std::string &UserId() const
