@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:34:10
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-04 15:55:23
+ * @LastEditTime: 2024-08-09 16:38:18
  * @FilePath: /liveServer/src/live/LiveService.cpp
  * @Description:  learn 
  */
@@ -21,6 +21,7 @@
 #include "mmedia/flv/FlvContext.h"
 #include "live/WebrtcService.h"
 #include "mmedia/webrtc/WebrtcServer.h"
+#include "mmedia/webrtc/Srtp.h"
 
 using namespace tmms::live;
 using namespace tmms::mm;
@@ -478,6 +479,8 @@ void LiveService::Start()
                     // 所有单线程运行，避免加锁
                     if(!webrtc_server_)
                     {
+                        // 启动时初始化srtp
+                        Srtp::InitSrtpLibrary();
                         InetAddress local(s->addr, s->port);
                         webrtc_server_ = std::make_shared<WebrtcServer>(el ,local, sWebrtcService);
                         webrtc_server_->Start();

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 12:12:45
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 19:04:39
+ * @LastEditTime: 2024-08-09 11:23:41
  * @FilePath: /liveServer/src/live/WebrtcService.cpp
  * @Description:  learn 
  */
@@ -49,6 +49,8 @@ void WebrtcService::OnStun(const network::UdpSocketPtr &socket, const network::I
             auto webrtc_user = iter->second;
             // 用完就删除，sdp和stun是一一配对的
             name_users_.erase(iter);
+            // 设置地址保存一下
+            socket->SetPeerAddr(addr);
             stun.SetPassword(webrtc_user->LocalPasswd());
             // 因为之前sdp用的是http，使用tcpConnection
             // 所以在header中设置了close，后面都要用udp传输，设置为udpConnection到用户
@@ -58,7 +60,6 @@ void WebrtcService::OnStun(const network::UdpSocketPtr &socket, const network::I
         }
         else
         {
-            LIVE_ERROR << "stun localUfrag don't equal sdp localUfrag.";
             return;
         }
     }
@@ -77,8 +78,22 @@ void WebrtcService::OnStun(const network::UdpSocketPtr &socket, const network::I
     }
 }
 
+/**
+ * @description: udp收到消息给webserver，判断类型调用这个函数，然后再调用dtls的开始
+ * @param {UdpSocketPtr} &socket
+ * @param {InetAddress} &addr
+ * @param {MsgBuffer} &buf
+ * @return {*}
+ */
 void WebrtcService::OnDtls(const network::UdpSocketPtr &socket, const network::InetAddress &addr, network::MsgBuffer &buf)
 {
+    auto iter = users_.find(addr.ToIpPort());
+    if(iter != users_.end())
+    {
+        auto webrtc_user = iter->second;
+        webrtc_user->OnDtlsRecv(buf.Peek(), buf.ReadableBytes());
+        buf.RetrieveAll();
+    }
 }
 
 void WebrtcService::OnRtp(const network::UdpSocketPtr &socket, const network::InetAddress &addr, network::MsgBuffer &buf)

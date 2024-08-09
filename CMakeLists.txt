@@ -15,10 +15,22 @@ ExternalProject_Add(jsoncpp
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND cd ../jsoncpp-build && make install)
 
-############ 添加jsoncpp库
 include_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/include/) # 添加查找的include路径
 link_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/lib64/)  # 添加查找lib的路径
 link_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/lib/)
+
+
+############ 设置编译srtp库
+ExternalProject_Add(libsrtp2
+        SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/libsrtp/
+        CONFIGURE_COMMAND ./configure --prefix=${PROJECT_SOURCE_DIR}/lib/libsrtp/
+        BUILD_COMMAND make
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND make install
+)
+include_directories(${PROJECT_SOURCE_DIR}/lib/libsrtp/include/)
+link_directories(${PROJECT_SOURCE_DIR}/lib/libsrtp/lib/)
+
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)  #STREQUAL是字符串比较的运算符  debug 要调试信息 -g -pipi使用管道加快编译速度
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0 -g -pipe -Wall -Werror -Wno-unused-variable -Wno-deprecated-declarations -lrt -pthread")
@@ -26,6 +38,7 @@ elseif (NOT CMAKE_BUILD_TYPE STREQUAL Debug) # 不是debug，那就是Release，
     message(STATUS "Release Version")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -g -pipe -Wall -Werror -Wno-unused-variable -Wno-deprecated-declarations -lrt -pthread")
 endif()
+
 
 # -fno-strict-aliasing：
 # 关闭严格的别名优化。别名优化是一种编译器优化技术，它假定不同类型的指针不会指向相同的内存位置。在某些情况下，这种优化可能导致不正确的代码行为。使用这个选项可以避免这种问题，特别是在编写低级别代码或与旧代码库兼容时很有用。

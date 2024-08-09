@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 18:40:06
+ * @LastEditTime: 2024-08-09 11:25:24
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -10,12 +10,13 @@
 #include "live/base/LiveLog.h"
 #include "base/Config.h"
 #include "live/Session.h"
+#include "network/net/UdpSocket.h"
 #include <random>
 
 using namespace tmms::live;
 
 WebrtcPlayUser::WebrtcPlayUser(const ConnectionPtr &ptr, const StreamPtr &stream, const SessionPtr &s)
-:PlayerUser(ptr, stream, s)
+:PlayerUser(ptr, stream, s), dtls_(this)
 {
     local_ufrag_ = GetUFrag(8);
     local_passwd_ = GetUFrag(32);
@@ -29,8 +30,12 @@ WebrtcPlayUser::WebrtcPlayUser(const ConnectionPtr &ptr, const StreamPtr &stream
     sdp_.SetVideoSsrc(video_ssrc);
 
     // 生成证书指纹，设置
-    dtls_certs_.Init();
-    sdp_.SetFingerprint(dtls_certs_.Fingerprint());
+    if(!dtls_.Init())
+    {
+        LIVE_ERROR << "dtls init failed.";
+        return;
+    }
+    sdp_.SetFingerprint(dtls_.Fingerprint());
 
     auto config = sConfigMgr->GetConfig();
     if(config)
@@ -90,6 +95,40 @@ std::string WebrtcPlayUser::BuildAnswerSdp()
 void WebrtcPlayUser::SetConnection(const ConnectionPtr &conn)
 {
     User::SetConnection(conn);
+    conn->PeerAddr().GetSockAddr((struct sockaddr*)&addr_);
+}
+
+/**
+ * @description: 在收到dtls数据的时候，由上层webrtcSevice调用
+ * @param {char} *buf
+ * @param {size_t} size
+ * @return {*}
+ */
+void WebrtcPlayUser::OnDtlsRecv(const char *buf, size_t size)
+{
+    dtls_.OnRecv(buf, size);
+}
+
+void WebrtcPlayUser::OnDtlsSend(const char *data, size_t size, Dtls *dtls)
+{
+    LIVE_DEBUG << "dtls send size:" << size;
+    packet_ = Packet::NewPacket(size);
+    memcpy(packet_->Data(), data, size);
+    packet_->SetPacketSize(size);
+    auto socket = std::dynamic_pointer_cast<UdpSocket>(connection_);
+    socket->Send(packet_->Data(), packet_->PacketSize(), (struct sockaddr*)&addr_, addr_len_);
+}
+
+/**
+ * @description: dtls握手完成之后，拿到加密秘钥，就要初始化srtp
+ * @param {Dtls} *dtls
+ * @return {*}
+ */
+void WebrtcPlayUser::OnDtlsHandshakeDone(Dtls *dtls)
+{
+    LIVE_DEBUG << "dtls handshake done.";
+    dtls_done_ = true;
+    srtp_.Init(dtls_.RecvKey(), dtls_.SendKey());
 }
 
 /**
