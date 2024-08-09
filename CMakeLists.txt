@@ -31,6 +31,31 @@ ExternalProject_Add(libsrtp2
 include_directories(${PROJECT_SOURCE_DIR}/lib/libsrtp/include/)
 link_directories(${PROJECT_SOURCE_DIR}/lib/libsrtp/lib/)
 
+############ 设置编译faad库 解码aac->pcm
+ExternalProject_Add(libfaad2
+        SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/faad2/
+        #UPDATE_COMMAND ./bootstrap
+        CONFIGURE_COMMAND ./bootstrap && ./configure --prefix=${PROJECT_SOURCE_DIR}/lib/faad2/
+        BUILD_COMMAND make 
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND make install
+)
+include_directories(${PROJECT_SOURCE_DIR}/lib/faad2/include/)
+link_directories(${PROJECT_SOURCE_DIR}/lib/faad2/lib/)
+
+############ 设置编译opus库 编码pcm->opus
+ExternalProject_Add(libopus
+        #UPDATE_COMMAND
+        SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/opus/
+        CONFIGURE_COMMAND cd ${PROJECT_SOURCE_DIR}/third_party/opus/ && pwd && autoreconf -ifv ./ && ./configure --prefix=${PROJECT_SOURCE_DIR}/lib/opus/
+        #CONFIGURE_COMMAND cmake . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/lib/opus/
+        BUILD_COMMAND make 
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND make install
+)
+include_directories(${PROJECT_SOURCE_DIR}/lib/opus/include/)
+link_directories(${PROJECT_SOURCE_DIR}/lib/opus/lib/)
+
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)  #STREQUAL是字符串比较的运算符  debug 要调试信息 -g -pipi使用管道加快编译速度
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0 -g -pipe -Wall -Werror -Wno-unused-variable -Wno-deprecated-declarations -lrt -pthread")
