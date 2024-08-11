@@ -98,7 +98,7 @@ bool DtlsCerts::Init()
 
     ///////// 4. 签名, 用的sha1签名算法
     // 使用SHA-1哈希算法和EVP_PKEY中的私钥对证书进行签名
-    X509_sign(dtls_certs_, dtls_pkey_, EVP_sha1());
+    X509_sign(dtls_certs_, dtls_pkey_, EVP_sha256());
 
     ///////// 5. 计算指纹
     // 定义一个数组用于存储证书的SHA-256摘要

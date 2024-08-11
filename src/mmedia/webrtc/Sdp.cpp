@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 18:56:39
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 19:13:43
+ * @LastEditTime: 2024-08-11 15:17:52
  * @FilePath: /liveServer/src/mmedia/webrtc/Sdp.cpp
  * @Description:  learn 
  */
@@ -49,8 +49,8 @@ bool Sdp::Decode(const std::string &sdp)
         }
         else if(base::StringUtils::StartsWith(line, fingerprint_token))
         {
-            fingerprint_ = line.substr(fingerprint_token.size());
-            WEBRTC_DEBUG << "remote fingerprint: " << fingerprint_; 
+            remote_fingerprint_ = line.substr(fingerprint_token.size());
+            WEBRTC_DEBUG << "remote fingerprint: " << remote_fingerprint_; 
         }
         else if(base::StringUtils::StartsWith(line, rtpmap_token))
         {
@@ -99,7 +99,7 @@ const std::string &Sdp::GetRemoteUFrag() const
 
 const std::string &Sdp::GetFingerprint() const
 {
-    return fingerprint_;
+    return local_fingerprint_;
 }
 
 int32_t Sdp::GetVideoPayloadType() const
@@ -114,7 +114,7 @@ int32_t Sdp::GetAudioPayloadType() const
 
 void Sdp::SetFingerprint(const std::string &fp)
 {
-    fingerprint_ = fp;
+    local_fingerprint_ = fp;
 }
 
 /// @param name   session_name
@@ -205,7 +205,7 @@ std::string Sdp::Encode()
         ss << "c=IN IP4 0.0.0.0\n";
         ss << "a=ice-ufrag:" << local_ufrag_ << "\n";
         ss << "a=ice-pwd:" << local_passwd_ << "\n";
-        ss << "a=fingerprint:" << fingerprint_ << "\n";
+        ss << "a=fingerprint:sha-256 " << local_fingerprint_ << "\n";
         ss << "a=setup:passive\n";
         ss << "a=mid:0\n";
         ss << "a=sendonly\n";
@@ -228,7 +228,7 @@ std::string Sdp::Encode()
         ss << "c=IN IP4 0.0.0.0\n";
         ss << "a=ice-ufrag:" << local_ufrag_ << "\n";
         ss << "a=ice-pwd:" << local_passwd_ << "\n";
-        ss << "a=fingerprint:" << fingerprint_ << "\n";
+        ss << "a=fingerprint:sha-256 " << local_fingerprint_ << "\n";
         ss << "a=setup:passive\n";
         ss << "a=mid:1\n";
         ss << "a=sendonly\n";

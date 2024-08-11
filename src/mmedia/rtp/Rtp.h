@@ -61,7 +61,7 @@ namespace tmms
             uint32_t sequence_{0};
             uint32_t timestamp_{0};
             uint32_t ssrc_{0};  // 提供信源
-            uint32_t sample_{0};
+            uint32_t sample_{0}; // 采样率
         };
         
         

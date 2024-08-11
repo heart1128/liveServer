@@ -56,7 +56,8 @@ namespace tmms
             std::string remote_passwd_;
             std::string local_ufrag_;
             std::string local_passwd_;
-            std::string fingerprint_;
+            std::string remote_fingerprint_; // 客户端传入的证书指纹
+            std::string local_fingerprint_; // 本地对自签名证书的哈希指纹
 
             // 组装
             int32_t video_ssrc_{0};

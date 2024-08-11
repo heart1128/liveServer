@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-09 11:25:24
+ * @LastEditTime: 2024-08-11 16:54:43
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -143,7 +143,7 @@ std::string tmms::live::WebrtcPlayUser::GetUFrag(int size)
 
     // 初始化随机数生成器
     static std::mt19937 mt{std::random_device{}()};
-    // 离散均匀分布类，指定随机数范围,不超过uint8_t, 1字节
+    // 离散均匀分布类，指定随机数范围,不超过uint8_t, 1字节 
     static std::uniform_int_distribution<> rand(0, table.size());
 
     for(int i = 0; i < size; ++i)

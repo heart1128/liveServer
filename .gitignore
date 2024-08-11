@@ -34,3 +34,4 @@ bin/logs/*
 lib/*
 
 third_party/jsoncpp-build/*
+third_party/*

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 12:12:45
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-09 11:23:41
+ * @LastEditTime: 2024-08-11 15:26:05
  * @FilePath: /liveServer/src/live/WebrtcService.cpp
  * @Description:  learn 
  */
@@ -87,6 +87,7 @@ void WebrtcService::OnStun(const network::UdpSocketPtr &socket, const network::I
  */
 void WebrtcService::OnDtls(const network::UdpSocketPtr &socket, const network::InetAddress &addr, network::MsgBuffer &buf)
 {
+    // 添加一个用户和连接的映射，因为在之后的数据传输中不是使用的tcp，换成udp了
     auto iter = users_.find(addr.ToIpPort());
     if(iter != users_.end())
     {
