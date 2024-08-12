@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 15:09:16
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 19:31:33
+ * @LastEditTime: 2024-08-12 19:27:47
  * @FilePath: /liveServer/src/live/Session.cpp
  * @Description:  learn 
  */
@@ -16,6 +16,7 @@
 #include "live/user/FlvPlayerUser.h"
 #include "live/relay/PullerRelay.h"
 #include "live/user/WebrtcPlayUser.h"
+#include "live/WebrtcService.h"
 
 using namespace tmms::live;
 
@@ -192,8 +193,14 @@ void Session::CloseUser(const UserPtr &user)
     }
 }
 
+/**
+ * @description: 在stream中被调用，stream有数据就会激活
+ * @return {*}
+ */
 void Session::ActiveAllPlayers()
 {
+    // webrtc激活数据，向用户推流
+    sWebrtcService->Push2Players();
     // 用户的容器是所有线程共用的
     std::lock_guard<std::mutex> lk(lock_);
     for(auto const &u : players_)

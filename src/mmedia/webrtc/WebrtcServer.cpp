@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 15:17:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 16:36:09
+ * @LastEditTime: 2024-08-12 19:35:19
  * @FilePath: /liveServer/src/mmedia/webrtc/WebrtcServer.cpp
  * @Description:  learn 
  */
@@ -24,8 +24,80 @@ void WebrtcServer::Start()
                                             std::placeholders::_1,
                                             std::placeholders::_2,
                                             std::placeholders::_3));
+    
+    udp_server_->SetWriteCompleteCallback(std::bind(&WebrtcServer::WriteComplete, this,
+                                            std::placeholders::_1));
     udp_server_->Start();
     WEBRTC_DEBUG << "webrtc server start.";
+}
+
+void WebrtcServer::SendPacket(const PacketPtr & packet)
+{
+    std::lock_guard<std::mutex> lk(lock_);
+
+    // 有数据正在发送，等待，加入等待队列
+    if(b_sending_)
+    {
+        out_waiting_.emplace_back(packet);
+        return;
+    }
+    
+    // 没有数据在发送，加入发送队列
+    udp_outs_.clear();
+    std::shared_ptr<struct sockaddr_in6> addr = packet->Ext<struct sockaddr_in6>();
+    if(addr)
+    {
+        UdpBufferNodePtr up = std::make_shared<UdpBufferNode>(packet->Data(), packet->PacketSize()
+                                            , (struct sockaddr*)addr.get(), sizeof(struct sockaddr_in6));
+        udp_outs_.emplace_back(std::move(up)); // 发送过的
+        sending_.emplace_back(packet); // 准备发送的
+    }
+
+    // 使用udp进行发送数据
+    if(!udp_outs_.empty())
+    {
+        b_sending_ = true;
+        auto socket = std::dynamic_pointer_cast<UdpSocket>(udp_server_);
+        socket->Send(udp_outs_);
+    }
+}
+
+void WebrtcServer::SendPacket(std::list<PacketPtr> &list)
+{
+    std::lock_guard<std::mutex> lk(lock_);
+
+    // 有数据正在发送，等待，加入等待队列
+    if(b_sending_)
+    {
+        for(auto &p : list)
+        {
+            out_waiting_.emplace_back(p);
+        }
+        return;
+    }
+    
+    // 没有数据在发送，加入发送队列
+    udp_outs_.clear();
+    for(auto &p : list)
+    {
+        std::shared_ptr<struct sockaddr_in6> addr = p->Ext<struct sockaddr_in6>();
+        if(addr)
+        {
+            UdpBufferNodePtr up = std::make_shared<UdpBufferNode>(p->Data(), p->PacketSize()
+                                                , (struct sockaddr*)addr.get(), sizeof(struct sockaddr_in6));
+            udp_outs_.emplace_back(std::move(up)); // 发送过的
+            sending_.emplace_back(p); // 准备发送的
+        }
+    }
+
+
+    // 使用udp进行发送数据
+    if(!udp_outs_.empty())
+    {
+        b_sending_ = true;
+        auto socket = std::dynamic_pointer_cast<UdpSocket>(udp_server_);
+        socket->Send(udp_outs_);
+    }
 }
 
 void WebrtcServer::MessageCallback(const UdpSocketPtr &socket, const InetAddress &addr, MsgBuffer &buf)
@@ -91,4 +163,53 @@ bool WebrtcServer::IsRtcp(MsgBuffer &buf)
     return buf.ReadableBytes() >= 13 && 
         (data[0] >= 0 && data[0] <= 3) &&
         (data[1] >= 192 && data[1] <= 223);
+}
+
+void WebrtcServer::OnSend()
+{
+    std::lock_guard<std::mutex> lk(lock_);
+    // 在发送中或者需要发送的为空
+    if(b_sending_ || out_waiting_.empty())
+    {
+        return;
+    }
+    udp_outs_.clear();
+    for(auto &p : out_waiting_)
+    {
+        std::shared_ptr<struct sockaddr_in6> addr = p->Ext<struct sockaddr_in6>();
+        if(addr)
+        {
+            UdpBufferNodePtr up = std::make_shared<UdpBufferNode>(p->Data(), p->PacketSize()
+                                                , (struct sockaddr*)addr.get(), sizeof(struct sockaddr_in6));
+            udp_outs_.emplace_back(std::move(up)); // 发送过的
+            sending_.emplace_back(p); // 准备发送的
+        }
+    }
+
+    // 使用udp进行发送数据
+    if(!udp_outs_.empty())
+    {
+        b_sending_ = true;
+        auto socket = std::dynamic_pointer_cast<UdpSocket>(udp_server_);
+        socket->Send(udp_outs_);
+    }
+}
+
+/**
+ * @description: 写完一次udp，返回接着发送
+ * @param {UdpSocketPtr} &socket
+ * @return {*}
+ */
+void WebrtcServer::WriteComplete(const UdpSocketPtr &socket)
+{
+    std::lock_guard<std::mutex> lk(lock_);
+    b_sending_ = false;
+    sending_.clear();
+    udp_outs_.clear();
+
+    // 有数据就一直发送
+    if(!out_waiting_.empty())
+    {
+        OnSend();
+    }
 }

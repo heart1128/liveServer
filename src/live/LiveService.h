@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-29 16:27:09
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-04 15:43:25
+ * @LastEditTime: 2024-08-12 19:00:11
  * @FilePath: /liveServer/src/live/LiveService.h
  * @Description:  learn 
  */
@@ -62,6 +62,11 @@ namespace tmms
             void Start();
             void Stop();
             EventLoop* GetNextLoop();
+        /// webrtc
+            std::shared_ptr<WebrtcServer> GetWebrtcServer() const
+            {
+                return webrtc_server_;
+            }
 
         private:
             /// @brief 整个直播管理类要管理server，流媒体和用户

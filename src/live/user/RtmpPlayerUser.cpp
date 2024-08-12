@@ -26,6 +26,7 @@ bool RtmpPlayerUser::PostFrames()
     // 流没有准备好或者元数据都没有发送
     if(!stream_->Ready() || ! stream_->HasMedia())
     {
+        Deactive();
         return false;
     }
 

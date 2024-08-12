@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-11 16:54:43
+ * @LastEditTime: 2024-08-12 19:32:59
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -11,6 +11,8 @@
 #include "base/Config.h"
 #include "live/Session.h"
 #include "network/net/UdpSocket.h"
+#include "live/LiveService.h"
+#include "live/Stream.h"
 #include <random>
 
 using namespace tmms::live;
@@ -52,9 +54,83 @@ WebrtcPlayUser::WebrtcPlayUser(const ConnectionPtr &ptr, const StreamPtr &stream
     sdp_.SetStreamName(s->SessionName());
 }
 
+/**
+ * @description: 发送数据帧，通过上层的OnActive调用user进行发送
+ * @return {*}
+ */
 bool WebrtcPlayUser::PostFrames()
 {
-    return false;
+    // 流没有准备好或者元数据都没有发送, dtls没有握手成功也不行
+    if(!stream_->Ready() || ! stream_->HasMedia() || !dtls_done_)
+    {
+        Deactive();
+        return false;
+    }
+
+    stream_->GetFrames(std::dynamic_pointer_cast<PlayerUser>(shared_from_this()));
+    meta_.reset();
+    std::list<PacketPtr> rtp_pkts;
+    // 头
+    if(audio_header_)
+    {
+        auto ret = rtp_muxer_.EncodeAudio(audio_header_, rtp_pkts, 0);
+        audio_header_.reset();
+    }
+    else if(video_header_)
+    {
+        auto ret = rtp_muxer_.EncodeVideo(video_header_, rtp_pkts, 0);
+        video_header_.reset();
+    }
+    
+    if(!out_frames_.empty()) // 发送音视频数据
+    {
+        for(auto &p : out_frames_)
+        {
+            // 找到了关键帧
+            if(p->IsVideo() && p->IsKeyFrame())
+            {
+                got_key_frame_ = true;
+            }
+            if(!got_key_frame_)
+            {
+                continue;
+            }
+            // 找到了关键帧， 发送数据
+            if(p->IsAudio())
+            {
+                rtp_muxer_.EncodeAudio(p, rtp_pkts, 0);
+            }
+            else if(p->IsVideo())
+            {
+                rtp_muxer_.EncodeVideo(p, rtp_pkts, 0);
+            }
+        }
+        out_frames_.clear();
+    }
+    // 全部rtp包都放在了这里，进行发送
+    if(!rtp_pkts.empty())
+    {
+        std::list<PacketPtr> result;
+        for(auto &p : rtp_pkts)
+        {
+            // 发送之前使用srtp进行加密（也就是dtls握手生成的秘钥加密）
+            auto np = srtp_.RtpProtect(p);
+            if(np)
+            {
+                np->SetExt(addr_);
+                result.emplace_back(np);
+            }
+        }
+        // 获取webserver进行发送
+        auto server = sLiveService->GetWebrtcServer();
+        server->SendPacket(result);
+    }
+    else
+    {
+        // 没有数据了
+        Deactive();
+    }
+    return true;
 }
 
 UserType WebrtcPlayUser::GetUserType() const
@@ -109,14 +185,24 @@ void WebrtcPlayUser::OnDtlsRecv(const char *buf, size_t size)
     dtls_.OnRecv(buf, size);
 }
 
+/**
+ * @description: 在dtls中调用，发送dtls握手的数据
+ * @param {char} *data
+ * @param {size_t} size
+ * @param {Dtls} *dtls
+ * @return {*}
+ */
 void WebrtcPlayUser::OnDtlsSend(const char *data, size_t size, Dtls *dtls)
 {
     LIVE_DEBUG << "dtls send size:" << size;
-    packet_ = Packet::NewPacket(size);
-    memcpy(packet_->Data(), data, size);
-    packet_->SetPacketSize(size);
-    auto socket = std::dynamic_pointer_cast<UdpSocket>(connection_);
-    socket->Send(packet_->Data(), packet_->PacketSize(), (struct sockaddr*)&addr_, addr_len_);
+    PacketPtr packet = Packet::NewPacket(size);
+    memcpy(packet->Data(), data, size);
+    packet->SetPacketSize(size);
+    // 要设置addr，之后要拿出来使用
+    packet->SetExt(addr_);
+    auto server = sLiveService->GetWebrtcServer();
+    server->SendPacket(packet);
+
 }
 
 /**
@@ -129,6 +215,13 @@ void WebrtcPlayUser::OnDtlsHandshakeDone(Dtls *dtls)
     LIVE_DEBUG << "dtls handshake done.";
     dtls_done_ = true;
     srtp_.Init(dtls_.RecvKey(), dtls_.SendKey());
+
+    // sdp商量好了这些消息
+    // 初始化
+    rtp_muxer_.Init(sdp_.GetVideoPayloadType(),
+                    sdp_.GetAudioPayloadType(),
+                    sdp_.VideoSsrc(),
+                    sdp_.AudioSsrc());
 }
 
 /**
@@ -136,7 +229,7 @@ void WebrtcPlayUser::OnDtlsHandshakeDone(Dtls *dtls)
  * @param {int} size
  * @return {*}
 **/
-std::string tmms::live::WebrtcPlayUser::GetUFrag(int size)
+std::string WebrtcPlayUser::GetUFrag(int size)
 {
     static std::string table = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     std::string frag;

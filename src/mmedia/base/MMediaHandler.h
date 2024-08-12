@@ -22,6 +22,7 @@ namespace tmms
     namespace mm
     {
         using namespace network;
+        using namespace base;
 
         class MMediaHandler : public NonCopyable
         {

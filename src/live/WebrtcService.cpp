@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 12:12:45
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-11 15:26:05
+ * @LastEditTime: 2024-08-12 19:30:29
  * @FilePath: /liveServer/src/live/WebrtcService.cpp
  * @Description:  learn 
  */
@@ -17,6 +17,7 @@
 #include "live/Session.h"
 #include "live/LiveService.h"
 #include "live/user/WebrtcPlayUser.h"
+#include "mmedia/webrtc/WebrtcServer.h"
 #include <json/json.h>
 
 using namespace tmms::live;
@@ -25,6 +26,8 @@ using namespace tmms::mm;
 /**
  * @description: 收到udp的Onread()->webrtcServer()的MessageCallback()到这
  *                  进行stun的解析和组装回复
+ *          
+ *          stun如果有客户端请求，服务端必须不断响应，不然会认为断开连接
  * @param {UdpSocketPtr} &socket
  * @param {InetAddress} &addr
  * @param {MsgBuffer} &buf
@@ -41,40 +44,47 @@ void WebrtcService::OnStun(const network::UdpSocketPtr &socket, const network::I
         return;
     }
 
+    WebrtcPlayUserPtr webrtc_user;
+    std::lock_guard<std::mutex> lk(lock_);
+    auto iter = name_users_.find(stun.LocalUFrag());
+    if(iter != name_users_.end())
     {
-        std::lock_guard<std::mutex> lk(lock_);
-        auto iter = name_users_.find(stun.LocalUFrag());
-        if(iter != name_users_.end())
+        webrtc_user = iter->second;
+        // 用完就删除，sdp和stun是一一配对的
+        
+        stun.SetPassword(webrtc_user->LocalPasswd());
+        // 因为之前sdp用的是http，使用tcpConnection
+        // 所以在header中设置了close，后面都要用udp传输，设置为udpConnection到用户
+        webrtc_user->SetConnection(socket);
+        // 后续是udp传输，没有uFrag信息了，所以使用固定的ip port保存用户
+        users_.emplace(addr.ToIpPort(), webrtc_user);
+
+        // stun如果有客户端请求，服务端必须不断响应，不然会认为断开连接
+        // 所以每次都要发送
+        stun.SetMessageType(kStunMsgBindingResponse);
+        stun.SetMappedAddr(addr.IPv4());
+        stun.SetMappedPort(addr.Port());
+
+        PacketPtr packet = stun.Encode();
+        if(packet)
         {
-            auto webrtc_user = iter->second;
-            // 用完就删除，sdp和stun是一一配对的
-            name_users_.erase(iter);
-            // 设置地址保存一下
-            socket->SetPeerAddr(addr);
-            stun.SetPassword(webrtc_user->LocalPasswd());
-            // 因为之前sdp用的是http，使用tcpConnection
-            // 所以在header中设置了close，后面都要用udp传输，设置为udpConnection到用户
-            webrtc_user->SetConnection(socket);
-            // 后续是udp传输，没有uFrag信息了，所以使用固定的ip port保存用户
-            users_.emplace(addr.ToIpPort(), webrtc_user);
-        }
-        else
-        {
-            return;
+            // 拿到socket地址，使用webrtcserver打包发送
+            auto server = sLiveService->GetWebrtcServer();
+            auto naddr = webrtc_user->GetSockAddr();
+            // 每个用户设置一个地址，因为每个用户的ip port都是不一样的
+            packet->SetExt(naddr);
+            server->SendPacket(packet);
         }
     }
 
-    stun.SetMessageType(kStunMsgBindingResponse);
-    stun.SetMappedAddr(addr.IPv4());
-    stun.SetMappedPort(addr.Port());
-
-    PacketPtr packet = stun.Encode();
-    if(packet)
+    if(webrtc_user)
     {
-        // 拿到socket地址，使用udp发送
-        struct sockaddr_in6 sock_addr;
-        addr.GetSockAddr((sockaddr*)&sock_addr);
-        socket->Send(packet->Data(), packet->PacketSize(), (sockaddr*)&sock_addr, sizeof(struct sockaddr_in6));
+        // 用户没有加入要加入
+        auto iter1 = users_.find(addr.ToIpPort());
+        if(iter1 == users_.end())
+        {
+            users_.emplace(addr.ToIpPort(), webrtc_user);
+        }
     }
 }
 
@@ -227,6 +237,22 @@ void WebrtcService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr
             std::lock_guard<std::mutex> lk(lock_);
             name_users_.emplace(webrtc_user->LocalUFrag(), webrtc_user);
         }
+    }
+}
+
+
+/**
+ * @description: 在rtmp中推流上来的stream有数据就会调用session中激活所有用户
+ *      继而调用这个函数进行发送，因为webrtc是点对点的，不需要进行拉推
+ * @return {*}
+ */
+void WebrtcService::Push2Players()
+{
+    // 给webrtc发送用户所有数据
+    std::lock_guard<std::mutex> lk(user_lock_);
+    for(auto &user : users_)
+    {
+        user.second->PostFrames();
     }
 }
 

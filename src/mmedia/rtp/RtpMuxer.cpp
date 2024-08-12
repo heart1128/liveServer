@@ -115,7 +115,7 @@ int32_t RtpMuxer::EncodeAudio(PacketPtr &pkt, std::list<PacketPtr> &rtp_pkts, ui
             {
                 // 把packetPtr转成SampleBuf
                 std::list<SampleBuf> result;
-                for(auto &const o : outs)
+                for(auto &o : outs)
                 {
                     result.emplace_back(o->Data(), o->PacketSize());
                 }

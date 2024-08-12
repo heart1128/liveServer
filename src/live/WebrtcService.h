@@ -43,10 +43,16 @@ namespace tmms
             void OnRecv(const TcpConnectionPtr& conn, const PacketPtr &data)override{} 
             void OnRecv(const TcpConnectionPtr& conn, PacketPtr &&data)override{}
             void OnActive(const ConnectionPtr &conn)override{}
+
+            /**
+             * @description: 主动通知用户拉数据
+             */            
+            void Push2Players();
         
         private:
             std::string GetSessionNameFromUrl(const std::string &url);
             std::mutex lock_;  // 多线程操作map
+            std::mutex user_lock_; // 不同用户之间的锁
             std::unordered_map<std::string, WebrtcPlayUserPtr> name_users_; // 用户名对player
             std::unordered_map<std::string, WebrtcPlayUserPtr> users_;      // 在udp没有username的情况下使用
         };
