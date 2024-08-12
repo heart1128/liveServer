@@ -8,6 +8,7 @@
 **/
 #include "VideoDemux.h"
 #include "mmedia/base/MMediaLog.h"
+#include "mmedia/base/NalBitStream.h"
 #include "mmedia/base/BytesReader.h"
 
 using namespace tmms::mm;
@@ -152,6 +153,11 @@ int32_t VideoDemux::DecodeAVCNaluIAvcc(const char *data, size_t size, std::list<
         // 整理成一个个NALU包
         outs.emplace_back(SampleBuf(data, nalu_size));
         CheckNaluType(data);
+        // 检测有没有B帧
+        if(!has_bframe_)
+        {
+            has_bframe_ = CheckBFrame(data, nalu_size);
+        }
         data += nalu_size;
         size -= nalu_size;
     }
@@ -283,4 +289,31 @@ void VideoDemux::CheckNaluType(const char *data)
     {
         has_pps_sps_ = true;
     }
+}
+
+/**
+ * @description: 检测h265的B帧，因为webrtc不认B帧，所以要去除B帧
+ * @param {char} *data
+ * @param {size_t} bytes
+ * @return {*}
+ */
+bool VideoDemux::CheckBFrame(const char *data,size_t bytes)
+{
+    int nal_type = *data & 0x1f;
+    if (nal_type == 5 || nal_type == 1 || nal_type == 2) 
+    {
+        data  += 1;
+        bytes -= 1;
+        
+        int offset = 0;
+        NalBitStream stream(data,bytes);
+        int32_t first_mb_in_slice = stream.GetUE();
+        int32_t slice_type        = stream.GetUE();
+
+        if (slice_type == 1 || slice_type == 6)
+        {
+            return true;
+        }
+    }
+    return false;
 }

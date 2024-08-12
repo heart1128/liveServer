@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-09 18:34:26
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-09 18:50:10
+ * @LastEditTime: 2024-08-12 17:38:23
  * @FilePath: /liveServer/src/mmedia/rtp/TOpusEncoder.cpp
  * @Description:  learn 
  */
@@ -40,6 +40,12 @@ bool TOpusEncoder::Init(int sample, int channels)
     return true;
 }
 
+/**
+ * @description: 对pcm进行编码成opus
+ * @param {SampleBuf} &pcm
+ * @param {list<PacketPtr>} &pkts
+ * @return {*}
+ */
 bool TOpusEncoder::Encode(SampleBuf &pcm, std::list<PacketPtr> &pkts)
 {
     memcpy(pcm_buf_ + pcm_bytes_, pcm.addr, pcm.size);

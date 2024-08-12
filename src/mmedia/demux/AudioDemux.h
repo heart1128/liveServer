@@ -10,7 +10,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-05 13:49:14
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-09 11:19:39
+ * @LastEditTime: 2024-08-12 16:30:31
  * @FilePath: /liveServer/src/mmedia/demux/AudioDemux.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -18,6 +18,7 @@
 
 #include <list>
 #include <cstdint>
+#include <string>
 
 #include "mmedia/base/AVTypes.h"
 
@@ -49,6 +50,11 @@ namespace tmms
                 return aac_channel;
             }
 
+            int32_t GetSampleRate() const;
+            const std::string &AACSeqHeader()
+            {
+                return aac_seq_header_;
+            }
         private:
             int32_t DemuxAAC(const char *data, size_t size, std::list<SampleBuf> &list);
             int32_t DemuxMP3(const char *data, size_t size, std::list<SampleBuf> &list);
@@ -63,6 +69,7 @@ namespace tmms
             int32_t aac_sample_rate_;
             uint8_t aac_channel;
             bool aac_ok_{false};
+            std::string aac_seq_header_;
         };
     } // namespace mm
     

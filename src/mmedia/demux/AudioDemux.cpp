@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-07-09 11:19:37
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-07-09 13:42:53
+ * @LastEditTime: 2024-08-12 16:28:43
  * @FilePath: /liveServer/src/mmedia/demux/AudioDemux.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -64,6 +64,9 @@ int32_t AudioDemux::DemuxAAC(const char *data, size_t size, std::list<SampleBuf>
         // 1字节是tag header  1字节是avPacketType ,剩下的就是序列头数据
         if(size - 2 > 0)
         {
+            // 拿到aac序列头
+            aac_seq_header_.clear();
+            aac_seq_header_.assign(data + 2, size - 2);
             return DemuxAACSequenceHeadr(data + 2, size - 2);
         }
     }
@@ -109,4 +112,14 @@ int32_t AudioDemux::DemuxAACSequenceHeadr(const char *data, int size)
 
     aac_ok_ = true;
     return 0;
+}
+
+int32_t AudioDemux::GetSampleRate() const
+{
+    const int aac_sample_rates[16] = 
+    {
+        96000, 88200, 64000, 48000, 44100, 32000,
+        24000, 22050, 16000, 12000, 11025, 8000, 7350
+    };
+    return aac_sample_rates[aac_sample_rate_];
 }

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-09 17:06:19
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-09 17:13:26
+ * @LastEditTime: 2024-08-11 17:12:35
  * @FilePath: /liveServer/src/mmedia/rtp/Rtp.h
  * @Description:  learn 
  */
@@ -19,7 +19,7 @@ namespace tmms
 {
     namespace mm
     {
-
+        const int32_t kRtpMaxPayloadSize = 1400; // 单包最大大小，从mtu计算的
         enum RtcpPayloadType
         {
             kRtcpPtSR = 200,
@@ -56,7 +56,7 @@ namespace tmms
             uint32_t padding_:1;
             uint32_t extern_:1;
             uint32_t csrc_count_:4;
-            uint32_t marker_:1;
+            uint32_t marker_:1;     // 在分组的rtp中，最后一个包设置makert
             uint32_t payload_type_:7;
             uint32_t sequence_{0};
             uint32_t timestamp_{0};

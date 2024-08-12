@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-09 17:49:01
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-09 17:55:51
+ * @LastEditTime: 2024-08-12 17:46:09
  * @FilePath: /liveServer/src/mmedia/rtp/AACDecoder.cpp
  * @Description:  learn 
  */
@@ -11,6 +11,11 @@
 
 using namespace tmms::mm;
 
+/**
+ * @description: 读取序列头数据，进行初始化
+ * @param {string} &config  aac的序列头数据
+ * @return {*}
+ */
 bool AACDecoder::Init(const std::string &config)
 {
     // 创建aac decoder
@@ -41,7 +46,7 @@ bool AACDecoder::Init(const std::string &config)
 SampleBuf AACDecoder::Decode(unsigned char *aac, size_t aac_size)
 {
     NeAACDecFrameInfo frame_info;
-    // aac解码成frame（pcm格式），和ffmpeg差不多
+    // aac解码成frame（pcm格式），内部使用ffmpeg实现
     char *data = (char*)NeAACDecDecode(handle_, &frame_info, aac, aac_size);
     if(data && frame_info.samples > 0 && frame_info.error == 0)
     {

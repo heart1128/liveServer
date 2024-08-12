@@ -61,9 +61,16 @@ namespace tmms
                 has_aud_ = false;
                 has_idr_ = false;
                 has_pps_sps_ = false;
+                has_bframe_ = false;
+            }
+            
+            bool HasBframe() const
+            {
+                return has_bframe_;
             }
         
         private:  
+            bool CheckBFrame(const char *data,size_t bytes);
             int32_t DemuxAVC(const char *data,size_t size,std::list<SampleBuf> &outs);
 
             /**
@@ -154,6 +161,7 @@ namespace tmms
             bool has_aud_{false};         // 分隔符
             bool has_idr_{false};
             bool has_pps_sps_{false};
+            bool has_bframe_{false};
         };
         
         

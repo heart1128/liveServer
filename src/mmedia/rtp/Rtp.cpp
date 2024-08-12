@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-09 17:13:24
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-09 17:24:28
+ * @LastEditTime: 2024-08-12 17:00:10
  * @FilePath: /liveServer/src/mmedia/rtp/Rtp.cpp
  * @Description:  learn 
  */
@@ -49,6 +49,11 @@ uint32_t Rtp::Timestamp() const
     return timestamp_;
 }
 
+/**
+ * @description: ssrc是
+ * @param {uint32_t} ssrc
+ * @return {*}
+ */
 void Rtp::SetSsrc(uint32_t ssrc)
 {
     ssrc_ = ssrc;
