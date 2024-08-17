@@ -2,8 +2,8 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:47:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-06-22 19:44:34
- * @FilePath: /tmms/src/network/net/EventLoop.cpp
+ * @LastEditTime: 2024-08-17 15:11:28
+ * @FilePath: /liveServer/src/network/net/EventLoop.cpp
  * @Description:  learn 
  */
 #include "EventLoop.h"
@@ -53,7 +53,7 @@ void EventLoop::Loop()
                                 (struct epoll_event*)&epoll_events_[0],
                                 static_cast<int>(epoll_events_.size()),
                                 timeout);  // 1000ms也就是1s超时，超时不会执行for，只是执行任务队列和触发时间轮
-        
+                                
         if(ret >= 0)             // 超时的值是0
         {
             for(int i = 0; i < ret; i++)
@@ -72,6 +72,7 @@ void EventLoop::Loop()
 
                 Event::ptr &event = iter->second;
 
+                /// fixbug: 如果使用else if，因为事件是并发的，触发了一个不再触发别的事件，这个事件就消失了
                 if(ev.events & EPOLLERR)  // 出错事件
                 {
                     int error = 0;
@@ -80,16 +81,18 @@ void EventLoop::Loop()
                     getsockopt(event->Fd(), SOL_SOCKET, SO_ERROR, &error, &len);
 
                     event->OnError(strerror(error));    // 处理子类处理
+                    continue; // 错了就不能往下了
                 }
-                else if((ev.events & EPOLLHUP) && !(ev.events & EPOLLIN)) // 挂起（关闭）事件
+                if((ev.events & EPOLLHUP) && !(ev.events & EPOLLIN)) // 挂起（关闭）事件
                 {
                     event->OnClose();
+                    continue;
                 }
-                else if(ev.events & (EPOLLIN | EPOLLPRI)) // 读标志 和tcp带外数据（制定了紧急数据的）的，send加了MSG_OOB标志的数据
+                if(ev.events & (EPOLLIN | EPOLLPRI)) // 读标志 和tcp带外数据（制定了紧急数据的）的，send加了MSG_OOB标志的数据
                 {
                     event->OnRead();
                 }
-                else if(ev.events & EPOLLOUT)       // 写事件
+                if(ev.events & EPOLLOUT)       // 写事件
                 {
                     event->OnWrite();
                 }
@@ -153,6 +156,8 @@ void EventLoop::DelEvent(const Event::ptr &event)
 
     struct epoll_event ev;
     memset(&ev, 0x00, sizeof(struct epoll_event));
+
+    NETWORK_DEBUG << "删除的监听fd = " << event->fd_;
 
     ev.events = event->event_;
     ev.data.fd = event->fd_;

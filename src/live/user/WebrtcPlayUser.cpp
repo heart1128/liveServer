@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-12 19:32:59
+ * @LastEditTime: 2024-08-12 19:41:52
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -171,7 +171,6 @@ std::string WebrtcPlayUser::BuildAnswerSdp()
 void WebrtcPlayUser::SetConnection(const ConnectionPtr &conn)
 {
     User::SetConnection(conn);
-    conn->PeerAddr().GetSockAddr((struct sockaddr*)&addr_);
 }
 
 /**

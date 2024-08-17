@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 15:17:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-12 19:35:19
+ * @LastEditTime: 2024-08-12 20:47:07
  * @FilePath: /liveServer/src/mmedia/webrtc/WebrtcServer.cpp
  * @Description:  learn 
  */
@@ -34,7 +34,6 @@ void WebrtcServer::Start()
 void WebrtcServer::SendPacket(const PacketPtr & packet)
 {
     std::lock_guard<std::mutex> lk(lock_);
-
     // 有数据正在发送，等待，加入等待队列
     if(b_sending_)
     {
@@ -159,7 +158,7 @@ bool WebrtcServer::IsRtp(MsgBuffer &buf)
 /// @return 
 bool WebrtcServer::IsRtcp(MsgBuffer &buf)
 {
-        const char *data = buf.Peek();
+    const char *data = buf.Peek();
     return buf.ReadableBytes() >= 13 && 
         (data[0] >= 0 && data[0] <= 3) &&
         (data[1] >= 192 && data[1] <= 223);
@@ -185,7 +184,7 @@ void WebrtcServer::OnSend()
             sending_.emplace_back(p); // 准备发送的
         }
     }
-
+    out_waiting_.clear();
     // 使用udp进行发送数据
     if(!udp_outs_.empty())
     {

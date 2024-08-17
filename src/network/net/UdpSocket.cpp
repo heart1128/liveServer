@@ -129,6 +129,7 @@ void UdpSocket::SendInLoop(const char *buf, size_t size, struct sockaddr *addr, 
 
 void UdpSocket::OnRead()
 {
+
     if(closed_)     // 读之前要判断关闭
     {
         NETWORK_WARN << "host : " << peer_addr_.ToIpPort() << " had closed.";
@@ -147,7 +148,6 @@ void UdpSocket::OnRead()
                             0, 
                             (struct sockaddr*)&sock_addr,
                             &len);
-                        
         if(ret > 0) // 缓冲区已读设置
         {
             InetAddress peeraddr;

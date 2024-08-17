@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 12:12:45
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-12 19:30:29
+ * @LastEditTime: 2024-08-17 15:16:49
  * @FilePath: /liveServer/src/live/WebrtcService.cpp
  * @Description:  learn 
  */
@@ -50,14 +50,15 @@ void WebrtcService::OnStun(const network::UdpSocketPtr &socket, const network::I
     if(iter != name_users_.end())
     {
         webrtc_user = iter->second;
-        // 用完就删除，sdp和stun是一一配对的
         
         stun.SetPassword(webrtc_user->LocalPasswd());
         // 因为之前sdp用的是http，使用tcpConnection
         // 所以在header中设置了close，后面都要用udp传输，设置为udpConnection到用户
-        webrtc_user->SetConnection(socket);
+        webrtc_user->SetConnection(socket); 
         // 后续是udp传输，没有uFrag信息了，所以使用固定的ip port保存用户
-        users_.emplace(addr.ToIpPort(), webrtc_user);
+        // users_.emplace(addr.ToIpPort(), webrtc_user);
+        // 设置地址
+        webrtc_user->SetSockAddr(addr);
 
         // stun如果有客户端请求，服务端必须不断响应，不然会认为断开连接
         // 所以每次都要发送
@@ -109,6 +110,7 @@ void WebrtcService::OnDtls(const network::UdpSocketPtr &socket, const network::I
 
 void WebrtcService::OnRtp(const network::UdpSocketPtr &socket, const network::InetAddress &addr, network::MsgBuffer &buf)
 {
+     LIVE_DEBUG << "on rtp size: " << buf.ReadableBytes();
 }
 
 void WebrtcService::OnRtcp(const network::UdpSocketPtr &socket, const network::InetAddress &addr, network::MsgBuffer &buf)
