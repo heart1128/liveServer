@@ -23,7 +23,7 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/jsoncpp/lib/)
 ############ 设置编译srtp库
 ExternalProject_Add(libsrtp2
         SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/libsrtp/
-        CONFIGURE_COMMAND ./configure --prefix=${PROJECT_SOURCE_DIR}/lib/libsrtp/
+        CONFIGURE_COMMAND sh ./configure --prefix=${PROJECT_SOURCE_DIR}/lib/libsrtp/
         BUILD_COMMAND make
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND make install
@@ -35,7 +35,7 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/libsrtp/lib/)
 ExternalProject_Add(libfaad2
         SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/faad2/
         #UPDATE_COMMAND ./bootstrap
-        CONFIGURE_COMMAND ./bootstrap && ./configure --prefix=${PROJECT_SOURCE_DIR}/lib/faad2/
+        CONFIGURE_COMMAND sh ./bootstrap && ./configure --prefix=${PROJECT_SOURCE_DIR}/lib/faad2/
         BUILD_COMMAND make 
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND make install

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-12 19:41:52
+ * @LastEditTime: 2024-08-18 15:28:03
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -46,7 +46,7 @@ WebrtcPlayUser::WebrtcPlayUser(const ConnectionPtr &ptr, const StreamPtr &stream
         if(serverinfo)
         {
             // TODO: 这里需要给sdp设置udp的发送地址，如果是0.0.0.0就发送不到，所以发送到不是同一个局域网的不知道怎么弄
-            sdp_.SetServerAddr("8.149.142.249");
+            sdp_.SetServerAddr("10.101.128.69");
             // sdp_.SetServerAddr(serverinfo->addr);
             sdp_.SetServerPort(serverinfo->port);
         }
@@ -98,11 +98,11 @@ bool WebrtcPlayUser::PostFrames()
             // 找到了关键帧， 发送数据
             if(p->IsAudio())
             {
-                rtp_muxer_.EncodeAudio(p, rtp_pkts, 0);
+                rtp_muxer_.EncodeAudio(p, rtp_pkts, p->TimeStamp());
             }
             else if(p->IsVideo())
             {
-                rtp_muxer_.EncodeVideo(p, rtp_pkts, 0);
+                rtp_muxer_.EncodeVideo(p, rtp_pkts, p->TimeStamp());
             }
         }
         out_frames_.clear();

@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-08 21:14:28
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-08 22:45:25
+ * @LastEditTime: 2024-08-18 15:24:17
  * @FilePath: /liveServer/src/mmedia/webrtc/Dtls.cpp
  * @Description:  learn 
  */
@@ -274,16 +274,25 @@ void Dtls::GetSrtpKey()
     std::string server_master_salt((char*)material + offset, srtp_salt_len);
     offset += srtp_salt_len;
 
-    if(is_client_)
-    {
-        // 客户端来说，接收者是server
-        recv_key_ = server_master_key + server_master_salt;
-        send_key_ = client_master_key + client_master_salt;
-    }
-    else
-    {
-        // 服务端相反
-        recv_key_ = client_master_key + client_master_salt;
-        send_key_ = server_master_key + server_master_salt;
-    }
+    WEBRTC_DEBUG << " dtls is server.";
+    // 服务端相反
+    recv_key_ = client_master_key + client_master_salt;
+    send_key_ = server_master_key + server_master_salt;
+
+    // 服务端和客户端识别错了，因为这里只做服务端，直接使用服务端的就行
+
+    // if(is_client_)
+    // {
+    //     WEBRTC_DEBUG << " dtls is client.";
+    //     // 客户端来说，接收者是server
+    //     recv_key_ = server_master_key + server_master_salt;
+    //     send_key_ = client_master_key + client_master_salt;
+    // }
+    // else
+    // {
+    //     WEBRTC_DEBUG << " dtls is server.";
+    //     // 服务端相反
+    //     recv_key_ = client_master_key + client_master_salt;
+    //     send_key_ = server_master_key + server_master_salt;
+    // }
 }

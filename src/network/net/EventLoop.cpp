@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-06-03 14:47:29
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-17 15:11:28
+ * @LastEditTime: 2024-08-18 15:23:28
  * @FilePath: /liveServer/src/network/net/EventLoop.cpp
  * @Description:  learn 
  */
@@ -156,8 +156,6 @@ void EventLoop::DelEvent(const Event::ptr &event)
 
     struct epoll_event ev;
     memset(&ev, 0x00, sizeof(struct epoll_event));
-
-    NETWORK_DEBUG << "删除的监听fd = " << event->fd_;
 
     ev.events = event->event_;
     ev.data.fd = event->fd_;
