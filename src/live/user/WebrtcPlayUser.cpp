@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-18 15:28:03
+ * @LastEditTime: 2024-08-18 16:37:41
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -13,6 +13,9 @@
 #include "network/net/UdpSocket.h"
 #include "live/LiveService.h"
 #include "live/Stream.h"
+#include "base/TTime.h"
+#include "mmedia/rtp/SenderReport.h"
+#include <sys/time.h>
 #include <random>
 
 using namespace tmms::live;
@@ -113,10 +116,29 @@ bool WebrtcPlayUser::PostFrames()
         std::list<PacketPtr> result;
         for(auto &p : rtp_pkts)
         {
+            // 统计发送的包数量，放入sr报文段
+            bool is_video = true;
+            if(p->IsAudio())
+            {
+                is_video = false;
+            }
+
             // 发送之前使用srtp进行加密（也就是dtls握手生成的秘钥加密）
             auto np = srtp_.RtpProtect(p);
             if(np)
             {
+                // 统计音视频字节数和包数量
+                if(is_video)
+                {
+                    video_out_bytes_ += np->PacketSize();
+                    ++video_out_pkts_count_;
+                }
+                else
+                {
+                    audio_out_bytes_ += np->PacketSize();
+                    ++audio_out_pkts_count_;
+                }
+
                 np->SetExt(addr_);
                 result.emplace_back(np);
             }
@@ -124,6 +146,8 @@ bool WebrtcPlayUser::PostFrames()
         // 获取webserver进行发送
         auto server = sLiveService->GetWebrtcServer();
         server->SendPacket(result);
+        // 检测要不要发送sr, 一个周期内
+        CheckSR();
     }
     else
     {
@@ -259,4 +283,80 @@ uint32_t WebrtcPlayUser::GetSsrc(int size)
     static std::uniform_int_distribution<> rand(10000000,99999999);
 
     return rand(mt);
+}
+
+
+void WebrtcPlayUser::SendSR(bool is_video)
+{
+    uint64_t now = base::TTime::NowMS();
+    uint64_t elapse = 0;
+    if(is_video)
+    {
+        elapse = now - video_sr_timestamp_;
+    }
+    else
+    {
+        elapse = now - audio_sr_timestamp_;
+    }
+
+    if(elapse < 3000) // 3s为一个周期
+    {
+        return;
+    }
+
+    SenderReport sr;
+    
+    struct timeval tv;
+    gettimeofday(&tv, NULL);                        // 获取精确时间到结构体
+    uint64_t ntp = tv.tv_sec * 1000000 + tv.tv_usec;    // 一个是s,一个是us，换算成s
+    // 发送端的时间戳
+    sr.SetNtpTimestamp(ntp);
+
+    if(is_video)
+    {
+        sr.SetSsrc(rtp_muxer_.VideoSsrc());
+        // 发送端最近发送rtp的时间戳
+        sr.SetRtpTimestamp(rtp_muxer_.VideoTimestamp());
+        sr.SetSentBytes(video_out_bytes_);
+        sr.SetSentPacketCount(video_out_pkts_count_);
+    }
+    else
+    {
+        sr.SetSsrc(rtp_muxer_.AudioSsrc());
+        // 发送端最近发送rtp的时间戳
+        sr.SetRtpTimestamp(rtp_muxer_.AudioTimestamp());
+        sr.SetSentBytes(audio_out_bytes_);
+        sr.SetSentPacketCount(audio_out_pkts_count_);
+    }
+
+    auto packet = sr.Encode();
+    if(packet)
+    {
+        // srtp加密发送
+        auto np = srtp_.RtcpProtect(packet);
+        if(np)
+        {
+            np->SetExt(addr_);
+            auto server = sLiveService->GetWebrtcServer();
+            server->SendPacket(packet);
+        }
+    }
+
+    // 更新发送时间
+    if(is_video)
+    {
+        video_sr_timestamp_ = now;
+    }
+    else
+    {
+        audio_sr_timestamp_ = now;
+    }
+
+}
+
+
+void WebrtcPlayUser::CheckSR()
+{
+    SendSR(true);  // 发送视频
+    SendSR(false); // 发送音频
 }

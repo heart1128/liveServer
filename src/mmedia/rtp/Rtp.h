@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-09 17:06:19
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-11 17:12:35
+ * @LastEditTime: 2024-08-18 16:39:23
  * @FilePath: /liveServer/src/mmedia/rtp/Rtp.h
  * @Description:  learn 
  */
@@ -20,16 +20,16 @@ namespace tmms
     namespace mm
     {
         const int32_t kRtpMaxPayloadSize = 1400; // 单包最大大小，从mtu计算的
-        enum RtcpPayloadType
-        {
-            kRtcpPtSR = 200,
-            kRtcpPtRR = 201,
-            kRtcpPtSdes   = 202,
-            kRtcpPtBye    = 203,
-            kRtcpPtApp    = 204,
-            kRtcpPtRtpfb  = 205,
-            kRtcpPtPsfb   = 206,
-        };
+        // enum RtcpPayloadType
+        // {
+        //     kRtcpPtSR = 200,
+        //     kRtcpPtRR = 201,
+        //     kRtcpPtSdes   = 202,
+        //     kRtcpPtBye    = 203,
+        //     kRtcpPtApp    = 204,
+        //     kRtcpPtRtpfb  = 205,
+        //     kRtcpPtPsfb   = 206,
+        // };
 
         class Rtp
         {

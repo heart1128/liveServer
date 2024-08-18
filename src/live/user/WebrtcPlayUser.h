@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:04:47
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-12 19:36:20
+ * @LastEditTime: 2024-08-18 16:22:27
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.h
  * @Description:  learn 
  */
@@ -63,6 +63,8 @@ namespace tmms
 
             static std::string GetUFrag(int size);
             static uint32_t GetSsrc(int size);
+            void SendSR(bool is_video);
+            void CheckSR();
 
             std::string local_ufrag_;
             std::string local_passwd_;
@@ -77,6 +79,15 @@ namespace tmms
 
             RtpMuxer rtp_muxer_;
             bool got_key_frame_{false};
+
+            // RTCP的SR报文信息统计
+            uint32_t video_out_bytes_{0};
+            uint32_t audio_out_bytes_{0};
+            uint32_t video_out_pkts_count_{0};
+            uint32_t audio_out_pkts_count_{0};
+            uint64_t video_sr_timestamp_{0};  // 上一次sr的timestamp
+            uint64_t audio_sr_timestamp_{0};
+
         };
         
         

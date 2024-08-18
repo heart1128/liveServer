@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-12 16:52:59
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-12 17:45:14
+ * @LastEditTime: 2024-08-18 16:29:20
  * @FilePath: /liveServer/src/mmedia/rtp/RtpMuxer.cpp
  * @Description:  learn 
  */
@@ -129,20 +129,20 @@ int32_t RtpMuxer::EncodeAudio(PacketPtr &pkt, std::list<PacketPtr> &rtp_pkts, ui
 
 uint32_t RtpMuxer::VideoTimestamp() const
 {
-    return 0;
+    return video_rtp_->Timestamp();
 }
 
 uint32_t RtpMuxer::AudioTimestamp() const
 {
-    return 0;
+    return audio_rtp_->Timestamp();
 }
 
 uint32_t RtpMuxer::VideoSsrc() const
 {
-    return 0;
+    return video_rtp_->Ssrc();
 }
 
 uint32_t RtpMuxer::AudioSsrc() const
 {
-    return 0;
+    return audio_rtp_->Ssrc();
 }
