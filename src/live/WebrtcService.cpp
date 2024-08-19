@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 12:12:45
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-17 15:16:49
+ * @LastEditTime: 2024-08-19 16:34:43
  * @FilePath: /liveServer/src/live/WebrtcService.cpp
  * @Description:  learn 
  */
@@ -115,6 +115,14 @@ void WebrtcService::OnRtp(const network::UdpSocketPtr &socket, const network::In
 
 void WebrtcService::OnRtcp(const network::UdpSocketPtr &socket, const network::InetAddress &addr, network::MsgBuffer &buf)
 {
+    // 找到用户，调用接口
+    auto iter = users_.find(addr.ToIpPort());
+    if(iter != users_.end())
+    {
+        auto webrtc_user = iter->second;
+        webrtc_user->OnRtcp(buf.Peek(), buf.ReadableBytes());
+        buf.RetrieveAll();
+    }
 }
 
 void WebrtcService::OnRequest(const TcpConnectionPtr &conn, const HttpRequestPtr &req, const PacketPtr &packet)

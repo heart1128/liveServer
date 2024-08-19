@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:04:47
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-18 16:22:27
+ * @LastEditTime: 2024-08-19 16:11:16
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.h
  * @Description:  learn 
  */
@@ -55,6 +55,8 @@ namespace tmms
                 }
                 addr.GetSockAddr((struct sockaddr*)addr_.get());
             }
+            
+            void OnRtcp(const char* buf, size_t size);
 
         private:
             // dtls回调，这里再往上回调
@@ -65,6 +67,12 @@ namespace tmms
             static uint32_t GetSsrc(int size);
             void SendSR(bool is_video);
             void CheckSR();
+
+            void AddVideo(const PacketPtr &pkt);
+            void AddAudio(const PacketPtr &pkt);
+            PacketPtr GetVideo(int idx);
+            PacketPtr GetAudio(int idx); 
+            void ProcessRtpfb(const char *buf,size_t size);
 
             std::string local_ufrag_;
             std::string local_passwd_;
@@ -88,6 +96,9 @@ namespace tmms
             uint64_t video_sr_timestamp_{0};  // 上一次sr的timestamp
             uint64_t audio_sr_timestamp_{0};
 
+            std::mutex queue_lock_;
+            std::vector<PacketPtr> video_queue_;
+            std::vector<PacketPtr> audio_queue_;
         };
         
         

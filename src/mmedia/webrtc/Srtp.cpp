@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-09 16:08:50
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-09 16:36:37
+ * @LastEditTime: 2024-08-19 16:13:10
  * @FilePath: /liveServer/src/mmedia/webrtc/Srtp.cpp
  * @Description:  learn 
  */
@@ -204,7 +204,29 @@ PacketPtr Srtp::SrtcpUnprotect(PacketPtr &pkt)
 
 PacketPtr Srtp::SrtcpUnprotect(const char *buf, size_t size)
 {
-    return PacketPtr();
+    int32_t bytes = size;
+
+    if(bytes >= kSrtpMaxBufferSize)
+    {
+        WEBRTC_ERROR << "pkt too large, bytes:" << bytes << " max:" << kSrtpMaxBufferSize;
+        return null_packet;
+    }  
+
+    // 传入改变，所以要用一个中间缓存
+    std::memcpy(r_buffer_, buf, size);
+    // 对数据进行解密
+    auto ret = srtp_unprotect_rtcp(recv_ctx_, r_buffer_, &bytes);
+    if(ret != srtp_err_status_ok)
+    {
+        WEBRTC_ERROR << "srtp_unprotect failed.err= "<< ret;
+        return null_packet;
+    } 
+
+    PacketPtr npkt = Packet::NewPacket(bytes);
+    std::memcpy(npkt->Data(), r_buffer_, bytes);
+    npkt->SetPacketSize(bytes);
+    
+    return npkt;
 }
 
 void Srtp::OnSrtpEvent(srtp_event_data_t *data)

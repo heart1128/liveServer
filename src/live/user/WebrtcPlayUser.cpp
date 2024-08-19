@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 16:07:48
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-18 16:37:41
+ * @LastEditTime: 2024-08-19 17:00:29
  * @FilePath: /liveServer/src/live/user/WebrtcPlayUser.cpp
  * @Description:  learn
  */
@@ -15,13 +15,14 @@
 #include "live/Stream.h"
 #include "base/TTime.h"
 #include "mmedia/rtp/SenderReport.h"
+#include "mmedia/rtp/Rtpfb.h"
 #include <sys/time.h>
 #include <random>
 
 using namespace tmms::live;
 
 WebrtcPlayUser::WebrtcPlayUser(const ConnectionPtr &ptr, const StreamPtr &stream, const SessionPtr &s)
-:PlayerUser(ptr, stream, s), dtls_(this)
+:PlayerUser(ptr, stream, s), dtls_(this), video_queue_(500),audio_queue_(500)
 {
     local_ufrag_ = GetUFrag(8);
     local_passwd_ = GetUFrag(32);
@@ -121,6 +122,12 @@ bool WebrtcPlayUser::PostFrames()
             if(p->IsAudio())
             {
                 is_video = false;
+                // 保存到队列
+                AddAudio(p);
+            }
+            else
+            {
+                AddVideo(p);
             }
 
             // 发送之前使用srtp进行加密（也就是dtls握手生成的秘钥加密）
@@ -207,6 +214,8 @@ void WebrtcPlayUser::OnDtlsRecv(const char *buf, size_t size)
 {
     dtls_.OnRecv(buf, size);
 }
+
+
 
 /**
  * @description: 在dtls中调用，发送dtls握手的数据
@@ -359,4 +368,145 @@ void WebrtcPlayUser::CheckSR()
 {
     SendSR(true);  // 发送视频
     SendSR(false); // 发送音频
+}
+
+
+/**
+ * @description: 把视频包加入到队列，使用下标编号，之后可以通过下标进行重传
+ * @param {PacketPtr} &pkt
+ * @return {*}
+ */
+void WebrtcPlayUser::AddVideo(const PacketPtr &pkt)
+{
+    std::lock_guard<std::mutex> lk(queue_lock_);
+    int index = pkt->Index() % video_queue_.size();
+    video_queue_[index] = pkt;
+}
+
+void WebrtcPlayUser::AddAudio(const PacketPtr &pkt)
+{
+    std::lock_guard<std::mutex> lk(queue_lock_);
+    int index = pkt->Index() % audio_queue_.size();
+    audio_queue_[index] = pkt;
+}
+
+PacketPtr WebrtcPlayUser::GetVideo(int idx)
+{
+    std::lock_guard<std::mutex> lk(queue_lock_);
+    int index = idx % video_queue_.size();
+    auto pkt = video_queue_[index];
+    if(pkt && pkt->Index() == idx)
+    {
+        return pkt;
+    }
+    return PacketPtr();
+}
+
+PacketPtr WebrtcPlayUser::GetAudio(int idx)
+{
+    std::lock_guard<std::mutex> lk(queue_lock_);
+    int index = idx % audio_queue_.size();
+    auto pkt = audio_queue_[index];
+    if(pkt && pkt->Index() == idx)
+    {
+        return pkt;
+    }
+    return PacketPtr();
+}
+
+
+void WebrtcPlayUser::OnRtcp(const char *buf, size_t size)
+{
+    // 收到的包是srtp加密的，进行解密
+    auto np = srtp_.SrtcpUnprotect(buf, size);
+    if(!np)
+    {
+        return;
+    }
+    uint8_t pt = (uint8_t)buf[1];
+    // rtcp有多种不同的信息反馈
+    switch (pt)
+    {
+        case kRtcpPtRR:
+        {
+            break;
+        }
+        case kRtcpPtRtpfb:
+        {
+            ProcessRtpfb(np->Data(), np->PacketSize());
+            break;
+        }
+        case kRtcpPtPsfb:
+        {
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+/**
+ * @description: 处理RTCP的fb报文
+ * @param {char} *buf
+ * @param {size_t} size
+ * @return {*}
+ */
+void WebrtcPlayUser::ProcessRtpfb(const char *buf, size_t size)
+{
+    Rtpfb rtpfb;
+    rtpfb.Decode(buf, size);
+
+    uint32_t media_ssrc = rtpfb.MediaSsrc();
+    bool is_video = media_ssrc == rtp_muxer_.VideoSsrc();
+    bool is_audio = media_ssrc == rtp_muxer_.AudioSsrc();
+
+    if(!is_video && !is_audio)
+    {
+        return;
+    }
+
+    // 查找丢失的报文
+    auto lost_sets = rtpfb.LostSeqs();
+    std::list<PacketPtr> lost_list;
+    for(auto &l : lost_sets)
+    {
+        if(is_audio)
+        {
+            auto pkt = GetAudio(l);
+            if(pkt)
+            {
+                lost_list.emplace_back(pkt);
+            }
+        }
+        else if(is_video)
+        {
+            auto pkt = GetVideo(l);
+            if(pkt)
+            {
+                lost_list.emplace_back(pkt);
+            }
+        }
+    }
+
+    // 存在丢失的报文
+    if(!lost_list.empty())
+    {
+        std::list<PacketPtr> result;
+        for(auto &p : lost_list)
+        {
+            // 加密
+            auto np = srtp_.RtcpProtect(p);
+            if(np)
+            {
+                np->SetExt(addr_);
+                result.emplace_back(np);
+            }
+        }
+        // 加密之后发送
+        if(!result.empty())
+        {
+            auto server = sLiveService->GetWebrtcServer();
+            server->SendPacket(result);
+        }
+    }
 }

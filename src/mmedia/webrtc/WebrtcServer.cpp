@@ -2,7 +2,7 @@
  * @Author: heart1128 1020273485@qq.com
  * @Date: 2024-08-04 15:17:13
  * @LastEditors: heart1128 1020273485@qq.com
- * @LastEditTime: 2024-08-18 15:21:03
+ * @LastEditTime: 2024-08-19 16:55:19
  * @FilePath: /liveServer/src/mmedia/webrtc/WebrtcServer.cpp
  * @Description:  learn 
  */
@@ -139,7 +139,7 @@ bool WebrtcServer::IsDtls(MsgBuffer &buf)
 bool WebrtcServer::IsStun(MsgBuffer &buf)
 {
     const char *data = buf.Peek();
-    return buf.ReadableBytes() >= 12 && data[0] >= 0 && data[0] <= 3;
+    return buf.ReadableBytes() >= 20 && data[0] >= 0 && data[0] <= 3;
 }
 
 /// @brief 长度至少为20字节 ，第一个字节为[128,191], 第二个字节不在[192, 223]
@@ -148,9 +148,8 @@ bool WebrtcServer::IsStun(MsgBuffer &buf)
 bool WebrtcServer::IsRtp(MsgBuffer &buf)
 {
     const char *data = buf.Peek();
-    return buf.ReadableBytes() >= 13 && 
-        (data[0] >= 0 && data[0] <= 3) &&
-        !(data[1] >= 192 && data[1] <= 223);
+    uint8_t pt = (uint8_t)data[1];
+    return buf.ReadableBytes() >= 12 && (data[0] & 0x80) && !(pt >= 192 && pt <= 223);
 }
 
 /// @brief 长度至少为20字节 ，第一个字节为[128,191], 第二个字节在[192, 223]
@@ -159,9 +158,8 @@ bool WebrtcServer::IsRtp(MsgBuffer &buf)
 bool WebrtcServer::IsRtcp(MsgBuffer &buf)
 {
     const char *data = buf.Peek();
-    return buf.ReadableBytes() >= 13 && 
-        (data[0] >= 0 && data[0] <= 3) &&
-        (data[1] >= 192 && data[1] <= 223);
+     uint8_t pt = (uint8_t)data[1];
+    return buf.ReadableBytes() >= 12 && (data[0] & 0x80) && (pt >= 192 && pt <= 223);
 }
 
 void WebrtcServer::OnSend()
